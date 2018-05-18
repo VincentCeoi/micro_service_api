@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" name="randerer" content="webkit">
+    <title>MicroService</title>
+    <link href="logo16.ico" rel="SHORTCUT ICON" />
+    <link href="css/login.css" rel="stylesheet" type="text/css" />
+    <!--<link rel="stylesheet" href="layui/css/layui.css" />-->
+    <script type="application/javascript" src="js/parent.js"></script>
+    <style>
+        .substitute{
+            position: fixed;
+            top:0;
+            left:0;
+            opacity: 0;
+            filter:alpha(opacity=0);  /*filter 过滤器   兼容IE678*/
+        }
+
+        #grad {
+            /*background: -webkit-linear-gradient(lightsalmon, palegoldenrod); !* Safari 5.1 - 6.0 *!
+            background: -o-linear-gradient(lightsalmon, palegoldenrod); !* Opera 11.1 - 12.0 *!
+            background: -moz-linear-gradient(lightsalmon, palegoldenrod); !* Firefox 3.6 - 15 *!
+            background: linear-gradient(lightsalmon, palegoldenrod); !* 标准的语法 *!*/
+            /*color: #F7B824;
+            color: lightsalmon;*/
+        }
+
+
+    </style>
+    <script>
+        <!--ie8及以下-->
+        var DEFAULT_VERSION = "8.0";
+        var ua = navigator.userAgent.toLowerCase();
+        var isIE = ua.indexOf("msie")>-1;
+        var safariVersion;
+        if(isIE){
+            safariVersion =  ua.match(/msie ([\d.]+)/)[1];
+        }
+        if(safariVersion < "10.0" ){
+//        if(1 <= 2 ){
+            alert("Your browser version is too low, please upgrade your browser");
+        }
+    </script>
+</head>
+<body id="grad" style="background-color: #e2e2e2;" >  <!--palegoldenrod-->
+<div class="logos" style="width: 970px; height: 658px;">
+    <img src="/image/lazadaLogin.png" alt="" height="658" width="1020">
+</div>
+<div id="title">
+    <img src="image/log-LEL.jpg" width="270" height="100">
+    <br><br>
+
+    欢迎使用 MicroService 平台！
+</div>
+<div class="input">
+    <!--class="substitute" 替身输入框，用来禁止浏览器自动填充用户名和密码-->
+    <input type="text" class="substitute"  placeholder="用户名" autocomplete='new-password'>
+    <input type="password" class="substitute" placeholder="密码" autocomplete="new-password">
+
+    <input id="inp1" type="text" class="input1"  placeholder="用户名" autocomplete='new-password'>
+    <input id="inp2" type="password" class="input2" placeholder="密码" autocomplete="new-password">
+    <input id="inp3" type="text" class="input3"  placeholder="验证码" autocomplete='new-password'>
+    <input id="inp4" type="button" class="input4" id="yanzhengma" onclick="getyanzhengma()" value="ssss">
+    <input id="inp5" type="button"onclick="confirm()" class="input5" value="登录">
+    <br>
+    <span><input type="checkbox" id="check1">&nbsp;<label for="check1">记住密码</label></span>
+</div>
+<script src="js/jquery-1.8.3.min.js"></script>
+<script src="js/jquery.cookie.js"></script>
+<script src="js/login.js"></script>
+<script>
+    //查询是否存在用户cookie
+    $.ajax({
+        type:'POST',
+        url: alldata.path +'user/getCookie',
+        cache:false,
+        dataType:'text',
+        success:function(result){
+            result = JSON.parse(result);
+
+            if(typeof result == 'object'){
+                $("#inp1").val(result.username);
+                $("#inp2").val(result.password);
+                $("#check1").prop('checked',true);
+            }else{
+                $("#check1").prop('checked',false);
+            }
+        },
+        error:function(e){
+//            e = JSON.parse(pako.ungzip($.base64.decode(e),{to:'string'}));
+            console.log(e)
+        }
+    })
+    /*layui.use('layer', function() { //加载layer
+        var $ = layui.jquery, layer = layui.layer; //加载layer
+    });*/
+</script>
+</body>
+</html>

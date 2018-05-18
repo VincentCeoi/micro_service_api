@@ -1,0 +1,258 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>修改数据同步配置</title>
+    <meta charset="utf-8" >
+    <script type="application/javascript" src="js/jquery-1.8.3.min.js"></script>
+    <script type="application/javascript" src="js/laydate/laydate.js"></script>
+    <script type="application/javascript" src="js/parent.js"></script>
+    <script type="application/javascript" src="js/modifyDataX.js"></script>
+    <style type="text/css">
+
+
+        #addSync tr td{
+            width: 250px;
+            height: 30px;
+        }
+        #addSync tr th{
+            width: 150px;
+            height: 30px;
+            color: grey;
+        }
+
+        #addSync tr td input{
+            height: 30px;
+            font-size: 16px;
+        }
+
+        #addSync tr td select{
+            height: 30px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #addSync tr td button{
+            height: 50px;
+            width: 140px;
+            font-size: 16px;
+            border: 3px;
+            background-color: #C9C9C9;
+            color: #2E2D3C;
+        }
+
+        .btnCommit{
+            background-color: lawngreen;
+        }
+
+        .btnReset{
+            background-color: #FD482C;
+
+        }
+
+
+
+    </style>
+
+
+    <script type="application/javascript" >
+
+        $(function () {
+            //窗口加载事件中，第一个调用
+            fullFormData();
+            $("select[name='syncMethod']").change(function () {
+                //获取选中的值
+                var val = $(this).val();
+                //判断值 该展示哪一个
+                if(val == "columnSync"){
+                    //现实填写列的部分
+                    $("#columnMethod").show();
+                    $("#splitPk").show();
+                    $("#sqlMethod").hide();
+                }else{
+                    //现实填写列的部分
+                    $("#columnMethod").hide();
+                    $("#sqlMethod").show();
+                    $("#splitPk").hide();
+                }
+            });
+
+            $("select[name='expre']").change(function () {
+                //获取选中的值
+                var val = $(this).val();
+                //判断值 该展示哪一个
+                if(val == "all"){   //每天
+                    $("#expressDate").hide();
+                    $("#expressTime").show();
+                }else{   // 指定日期
+                    $("#expressTime").hide();
+                    $("#expressDate").show();
+                }
+            });
+            //提交按钮，鼠标移入事件
+            $("#commitBtn").mouseover(function () {
+                $(this).addClass("btnCommit");
+            });
+            //提交按钮，鼠标移出事件
+            $("#commitBtn").mouseout(function () {
+                $(this).removeClass("btnCommit");
+            });
+
+            //重置按钮，鼠标移入事件
+            $("#resetBtn").mouseover(function () {
+                $(this).addClass("btnReset");
+            });
+            //重置按钮，鼠标移出事件
+            $("#resetBtn").mouseout(function () {
+                $(this).removeClass("btnReset");
+            });
+
+        });
+        //时间选择器
+        laydate.render({
+            elem: '#expressDate'
+            ,type: 'datetime'
+        });
+
+        //时间选择器
+        laydate.render({
+            elem: '#expressTime'
+            ,type: 'time'
+        });
+    </script>
+
+
+</head>
+<body  id="grad">
+<div align="center">
+    <div align="left" style="color: red;font-weight: bold;font-size: 18px;
+                padding-left: 20px;padding-bottom: 20px;">带 * 表示为必填项</div>
+    <form action="dataX/addDataXRec" id="myForm">
+        <table id="addSync">
+            <tr align="left">
+                <th><span style="color: red">*</span>同步说明：</th>
+                <td colspan="3">
+                    <!-- 隐藏域  -->
+                    <input type="hidden" style="width: 736px;" name="id">
+                    <input type="hidden" style="width: 736px;" name="createTime">
+                    <input type="hidden" style="width: 736px;" name="fileName">
+                    <input type="hidden" style="width: 736px;" name="status">
+                    <!-- 隐藏域  -->
+                    <input type="text" style="width: 736px;" name="name">
+                </td>
+            </tr>
+            <tr align="left">
+                <th>定时处理：</th>
+                <td>
+                    <select name="expre" style="width: 308px;">
+                        <option value="all">每天</option>
+                        <!--<option value="single">指定日期</option>-->
+                    </select>
+                </td>
+                <th><span style="color: red">*</span>定时处理：</th>
+                <td>
+                    <input id="expressDate" style="width: 254px;display: none;" name="expressDate">
+                    <input id="expressTime" style="width: 254px;" name="expressTime">
+                </td>
+            </tr>
+            <tr align="left">
+                <th><span style="color: red">*</span>数据源用户名：</th>
+                <td><input type="text" placeholder="用户名" style="width: 308px;" name="outUserName"></td>
+                <th><span style="color: red">*</span>数据源密码：</th>
+                <td><input type="password" placeholder="密码" style="width: 254px;" name="outPassword"></td>
+            </tr>
+            <tr align="left">
+                <th><span style="color: red">*</span>接收数据源用户名：</th>
+                <td><input type="text" style="width: 308px;" placeholder="用户名" name="inUserName"></td>
+                <th><span style="color: red">*</span>接收数据源密码：</th>
+                <td><input type="password" style="width: 254px;" placeholder="密码" name="inPassword"></td>
+            </tr>
+            <tr align="left">
+                <th>写入模型：</th>
+                <td><select name="writeMode" style="width: 310px;">
+                    <option value="insert">新增</option>
+                    <option value="replace">替换</option>
+                    <option value="update">更新</option>
+                </select></td>
+                <th><span style="color: red">*</span>通道数量：</th>
+                <td><input type="number" style="width: 254px;" name="channelCount" value="1"></td>
+            </tr>
+            <tr align="left">
+                <th>读取名称：</th>
+                <td><input type="text"   style="width: 308px;font-size: 16px;font-weight: bold;"   readonly="readonly" value="mysqlreader"></td>
+                <th>写入名称：</th>
+                <td><input type="text" style="width: 254px;font-size: 16px;font-weight: bold;"  readonly="readonly" value="mysqlwriter"></td>
+            </tr>
+            <tr align="left">
+                <th>同步前执行的SQL：</th>
+                <td><input type="text"   style="width: 308px;"   name="perSql"></td>
+                <th>同步后执行的SQL：</th>
+                <td><input type="text" style="width: 254px;"  name="postSql"></td>
+            </tr>
+            <tr align="left">
+                <th ><span style="color: red">*</span>数据源连接：</th>
+                <td>
+                    <input type="text" placeholder="数据库IP地址" style="width: 308px;"  name="outIPAddress">
+                </td>
+                <th ><span style="color: red">*</span>数据源端口：</th>
+                <td>
+                    <input type="text" placeholder="数据库端口" style="width: 254px;" name="outPort">
+                </td>
+            </tr>
+
+            <tr align="left">
+                <th><span style="color: red">*</span>接收数据源连接：</th>
+                <td>
+                    <input type="text" placeholder="数据库IP地址" style="width: 308px;"  name="inIPAddress">
+                </td>
+                <th><span style="color: red">*</span>接收数据源端口：</th>
+                <td>
+                    <input type="text" placeholder="数据库端口" style="width: 254px;" name="inPort">
+                </td>
+            </tr>
+            <tr align="left">
+                <th>同步的方式：</th>
+                <td colspan="3"><select name="syncMethod" style="width: 310px;">
+                    <option value="columnSync">列名同步</option>
+                    <option value="sqlSync">SQL查询同步</option>
+                </select></td>
+            </tr>
+            <tr align="left" id="columnMethod">
+                <th><span style="color: red">*</span>数据源列名：</th>
+                <td><input type="text" style="width: 308px;" name="outColumn"></td>
+                <th><span style="color: red">*</span>数据源表名：</th>
+                <td><input type="text"  style="width: 254px;" name="outTable"></td>
+            </tr>
+            <tr align="left">
+                <th><span style="color: red">*</span>数据源的数据库名：</th>
+                <td><input type="text" style="width: 308px;" name="outDatabaseName"></td>
+                <th><span style="color: red">*</span>接收数据的数据库名：</th>
+                <td><input type="text"  style="width: 254px;" name="inDatabaseName"></td>
+            </tr>
+            <tr align="left">
+                <th><span style="color: red">*</span>接收数据列名：</th>
+                <td><input type="text" style="width: 308px;" name="inColumn"></td>
+                <th><span style="color: red">*</span>接收数据表名：</th>
+                <td><input type="text"  style="width: 254px;" name="inTable"></td>
+            </tr>
+            <tr align="left" id="sqlMethod" style="display: none">
+                <th><span style="color: red">*</span>数据同步SQL：</th>
+                <td colspan="3"><input type="text" style="width: 736px;" name="querySql"></td>
+            </tr>
+            <tr align="left" id="splitPk">
+                <th>数据同步切片：</th>
+                <td colspan="3"><input type="text"  style="width: 736px;"  name="splitPk"></td>
+            </tr>
+            <tr></tr>
+            <tr align="center">
+                <td colspan="4">
+                    <button type="button" id="commitBtn" onclick="submitForm()">确认修改</button>
+                    <button type="reset" id="resetBtn" >重置</button>
+                </td>
+            </tr>
+        </table>
+    </form>
+</div>
+
+</body>
+</html>

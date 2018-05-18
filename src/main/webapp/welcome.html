@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" name="randerer" content="webkit">
+    <title>DataX管理</title>
+    <link href="logo16.ico" rel="SHORTCUT ICON" />
+    <script type="application/javascript" src="js/jquery-1.8.3.min.js"></script>
+    <script type="application/javascript" src="js/parent.js"></script>
+    <style>
+        .substitute{
+            position: fixed;
+            top:0;
+            left:0;
+            opacity: 0;
+            filter:alpha(opacity=0);  /*filter 过滤器   兼容IE678*/
+        }
+
+
+
+    </style>
+    <script>
+        <!--ie8及以下-->
+        var DEFAULT_VERSION = "8.0";
+        var ua = navigator.userAgent.toLowerCase();
+        var isIE = ua.indexOf("msie")>-1;
+        var safariVersion;
+        if(isIE){
+            safariVersion =  ua.match(/msie ([\d.]+)/)[1];
+        }
+        if(safariVersion < "10.0" ){
+//        if(1 <= 2 ){
+            alert("Your browser version is too low, please upgrade your browser");
+        }
+
+
+
+    </script>
+</head>
+<body>  <!--palegoldenrod-->
+    <div align="center">
+        <h2>欢迎使用MicroService管理平台！</h2>
+    </div>
+</body>
+</html>

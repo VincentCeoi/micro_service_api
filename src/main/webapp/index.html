@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" name="randerer" content="webkit">
+    <title>DataX管理</title>
+    <link href="logo16.ico" rel="SHORTCUT ICON" />
+    <script type="application/javascript" src="js/jquery-1.8.3.min.js"></script>
+    <script type="application/javascript" src="js/parent.js"></script>
+    <style>
+        .substitute{
+            position: fixed;
+            top:0;
+            left:0;
+            opacity: 0;
+            filter:alpha(opacity=0);  /*filter 过滤器   兼容IE678*/
+        }
+
+        #grad {
+            /*background: -webkit-linear-gradient(lightsalmon, palegoldenrod); !* Safari 5.1 - 6.0 *!
+            background: -o-linear-gradient(lightsalmon, palegoldenrod); !* Opera 11.1 - 12.0 *!
+            background: -moz-linear-gradient(lightsalmon, palegoldenrod); !* Firefox 3.6 - 15 *!
+            background: linear-gradient(lightsalmon, palegoldenrod); !* 标准的语法 *!*/
+            /*color: #F7B824;
+            color: lightsalmon;*/
+        }
+
+        .bg{
+            background-color: #eaeaea;
+        }
+
+        .item{
+            height: 30px;
+            padding-top: 15px;
+            padding-left: 30px;
+
+        }
+        a{
+            text-decoration-line: none;
+            color: grey;
+        }
+
+        a:hover{
+            color: #5FB878;
+            font-size: 18px;
+        }
+
+
+    </style>
+    <script>
+        <!--ie8及以下-->
+        var DEFAULT_VERSION = "8.0";
+        var ua = navigator.userAgent.toLowerCase();
+        var isIE = ua.indexOf("msie")>-1;
+        var safariVersion;
+        if(isIE){
+            safariVersion =  ua.match(/msie ([\d.]+)/)[1];
+        }
+        if(safariVersion < "10.0" ){
+//        if(1 <= 2 ){
+            alert("Your browser version is too low, please upgrade your browser");
+        }
+
+        $(function(){
+            $(".item").mouseover(function(){
+                $(this).addClass("bg");
+            });
+            $(".item").mouseout(function(){
+                $(this).removeClass("bg");
+            });
+            //添加配置选项单击事件
+            $("#add").click(function () {
+                $("#data-iframe").attr("src","addSync.html")
+            });
+            //配置列表选项单击事件
+            $("#list").click(function () {
+                $("#data-iframe").attr("src","SyncList.html")
+
+            });
+            //用户列表选项单击事件
+            $("#userList").click(function () {
+                $("#data-iframe").attr("src","userList.html")
+
+            });
+
+        });
+
+
+    </script>
+</head>
+<body>  <!--palegoldenrod-->
+    <div id="grad" style="width: 100%;height: 100%;margin: 0px;">
+        <div style="width: 100%;height:60px;font-size: 22px;margin: 0px;
+        font-weight: bold;">
+            <!-- log 图标 -->
+            <div style="float: left;width: 200px;height: 60px;">
+                <img src="image/log-LEL.jpg" width="200px" height="60px">
+            </div>
+            <div style="float: right;width: 200px;height: 50px;color: #333333;
+                        font-size: 16px;padding-top: 13px;">
+                <span>  欢迎 ：<span>admin</span> ！</span>
+                <span style="margin-left: 30px;">
+                    <a href="#">注销</a>
+                </span>
+            </div>
+            <hr style="clear: both;">
+    </div>
+        <div style="width: 200px;height: 580px;float: left;
+                padding-top: 10px;margin-top:4px;border-right: 1px solid #C9C9C9;">
+            <div id="list" class="item" >
+               配置列表
+            </div>
+            <div id="add" class="item" >
+                添加配置
+            </div>
+            <div id="userList" class="item" >
+                用户列表
+            </div>
+
+        </div>
+
+        <!-- 隐藏域 ，用于数据传递 -->
+        <input type="hidden" name="fileName">
+        <input type="hidden" name="name">
+        <input type="hidden" name="expression">
+        <input type="hidden" name="id">
+        <input type="hidden" name="createTime">
+        <input type="hidden" name="status">
+        <!-- 隐藏域 ，用于数据传递 -->
+
+
+        <div style="width: 79.6%;height: 550px;
+        margin-left: 17%;margin-top: 20px;">
+            <iframe src="welcome.html"id="data-iframe" style="height: 100%;"
+                    width="90%" height="100%" class="iframeo" name="child"
+                    frameborder="0" ></iframe> <!--scrolling="no"-->
+        </div>
+    </div>
+</body>
+</html>

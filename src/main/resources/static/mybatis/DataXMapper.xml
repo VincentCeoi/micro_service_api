@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lazada.microservice.mapper.DataXMapper" >
+  <resultMap id="dataxMap" type="com.lazada.microservice.model.DataX">
+    <id column="id" jdbcType="INTEGER" property="id" />
+    <result column="name" jdbcType="VARCHAR" property="name" />
+    <result column="filename" jdbcType="VARCHAR" property="filename" />
+    <result column="createtime" jdbcType="VARCHAR" property="createTime" />
+      <result column="modifytime" jdbcType="VARCHAR" property="modifytime" />
+    <result column="status" jdbcType="INTEGER" property="status" />
+    <result column="expression" jdbcType="VARCHAR" property="expression" />
+  </resultMap>
+
+
+    <!--获取datax列表-->
+    <select id="queryList" parameterMap="java.util.Map" resultMap="dataxMap">
+        select * form datax
+        where 1 = 1
+        <if test="name != null and name != ''">
+            and name like concat('%',#{name},'%')
+        </if>
+        <if test="startTime != null and startTime != ''">
+            and create_time > #{startTime}
+        </if>
+        <if test="stopTime != null and stopTime != ''">
+            and create_time <![CDATA[ < ]]> #{stopTime}
+        </if>
+        <if test="first != null and size != null">
+            limit #{first},#{size}
+        </if>
+        order by createtime,modifytime desc
+    </select>
+
+
+    <!--根据表达式获取数据-->
+    <select id="queryDataXByExpress" parameterMap="java.lang.String" resultMap="dataxMap">
+        select * from datax
+        where status = 1
+        <if test="expression != null and expression != ''">
+            and expression = #{expression}
+        </if>
+    </select>
+
+    <!--添加数据-->
+    <insert id="saveDatax"  parameterType="com.lazada.microservice.model.DataX">
+        insert into datax
+        <trim prefix="(" suffix=")" suffixOverrides="," >
+        <if test="name != null and name != ''" >
+            name,
+        </if>
+        <if test="filename != null and filename != ''" >
+            filename,
+        </if>
+        <if test="createtime != null and createtime != ''" >
+            createtime,
+        </if>
+        <if test="modifytime != null and modifytime != ''" >
+            modifytime,
+        </if>
+        <if test="status != null and status != ''" >
+            status,
+        </if>
+        <if test="expression != null and expression != ''" >
+            expression,
+        </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+        <if test="name != null and name != ''" >
+            #{name},
+        </if>
+        <if test="filename != null and filename != ''" >
+            #{filename},
+        </if>
+        <if test="createtime != null and createtime != ''" >
+            #{createtime},
+        </if>
+        <if test="modifytime != null and modifytime != ''" >
+            #{modifytime},
+        </if>
+        <if test="status != null and status != ''" >
+            #{status},
+        </if>
+        <if test="expression != null and expression != ''" >
+            #{expression},
+        </if>
+    </trim>
+    </insert>
+
+    <!--更新数据-->
+    <update id="updateDatax" parameterType="com.lazada.microservice.model.DataX">
+        update datax
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''" >
+                name = #{name},
+            </if>
+            <if test="filename != null and filename != ''" >
+                filename = #{filename},
+            </if>
+            <if test="createtime != null and createtime != ''" >
+                createtime = #{createtime},
+            </if>
+            <if test="modifytime != null and modifytime != ''" >
+                modifytime = #{modifytime},
+            </if>
+            <if test="status != null and status != ''" >
+                status = #{status},
+            </if>
+            <if test="expression != null and expression != ''" >
+                expression = #{expression},
+            </if>
+        </trim>
+        where id=#{id}
+    </update>
+
+    <!--删除数据-->
+    <delete id="deleteById" parameterType="java.lang.Integer">
+        delete from datax where id = #{id}
+    </delete>
+
+
+</mapper>

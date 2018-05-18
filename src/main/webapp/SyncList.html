@@ -1,0 +1,112 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>数据同步列表</title>
+    <script type="application/javascript" src="js/jquery-1.8.3.min.js"></script>
+    <script type="application/javascript" src="js/operator.js"></script>
+    <script type="application/javascript" src="js/parent.js"></script>
+    <meta charset="utf-8" />
+
+    <style type="text/css">
+
+        #syncList tr td{
+            width: 120px;
+            height: 30px;
+            align-content: center;
+        }
+        #syncList tr th{
+            color: #666666;
+            height: 30px;
+            align-content: center;
+            background-color: #C9C9C9;
+        }
+
+        #showTitle{
+            border: #666666 1px solid;
+        }
+
+        #syncList tr{
+            line-height: 30px;
+        }
+
+        .bg{
+            background-color: #eaeaea;
+        }
+        #grad {
+            /*background: -webkit-linear-gradient(lightsalmon, palegoldenrod); !* Safari 5.1 - 6.0 *!
+            background: -o-linear-gradient(lightsalmon, palegoldenrod); !* Opera 11.1 - 12.0 *!
+            background: -moz-linear-gradient(lightsalmon, palegoldenrod); !* Firefox 3.6 - 15 *!
+            background: linear-gradient(lightsalmon, palegoldenrod); !* 标准的语法 *!*/
+            /*color: #F7B824;
+            color: lightsalmon;*/
+        }
+
+        #pageTools button{
+
+            width: 110px;
+            height: 35px;
+
+        }
+
+
+        a{
+            text-decoration-line: none;
+            color: grey;
+        }
+
+        a:hover{
+            color: #5FB878;
+            font-size: 18px;
+        }
+
+
+    </style>
+
+    <script type="application/javascript">
+        /**
+         * 窗体加载事件
+         */
+        $(function () {
+            //调用，显示数据
+            dataX.queryList();
+        });
+
+
+        function addBg(obj){
+            $(obj).addClass("bg");
+        }
+
+        function removeBg(obj){
+            $(obj).removeClass("bg");
+        }
+        
+
+    </script>
+</head>
+<body id="grad" style="height: 450px;">
+<div align="center" style="height: 490px;">
+    <table id="syncList" >
+        <tr id="showTitle" style="border: 1px solid black;">
+            <th width="150px;">同步说明</th>
+            <th  width="150px;">文件名</th>
+            <th  width="150px;">表达式</th>
+            <th  width="150px;">创建时间</th>
+            <th  width="150px;">修改时间</th>
+            <th  width="150px;">是否可用</th>
+            <th width="150px;">操作</th>
+        </tr>
+    </table>
+</div>
+<div align="center" >
+    <!-- 分页栏 -->
+    <div id="pageTools">
+        <button type="button">首页</button>
+        <button type="button">上一页</button>
+        <span id="pageNum">1</span>/<span id="pageSum">21</span>
+        <button type="button">下一页</button>
+        <button type="button">尾页</button>
+    </div>
+</div>
+</body>
+</html>
