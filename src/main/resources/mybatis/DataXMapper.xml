@@ -6,7 +6,7 @@
     <id column="id" jdbcType="INTEGER" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="filename" jdbcType="VARCHAR" property="filename" />
-    <result column="createtime" jdbcType="VARCHAR" property="createTime" />
+    <result column="createtime" jdbcType="VARCHAR" property="createtime" />
       <result column="modifytime" jdbcType="VARCHAR" property="modifytime" />
     <result column="status" jdbcType="INTEGER" property="status" />
     <result column="expression" jdbcType="VARCHAR" property="expression" />
@@ -14,8 +14,8 @@
 
 
     <!--获取datax列表-->
-    <select id="queryList" parameterMap="java.util.Map" resultMap="dataxMap">
-        select * form datax
+    <select id="queryList" parameterType="java.util.Map" resultMap="dataxMap">
+        select * from datax
         where 1 = 1
         <if test="name != null and name != ''">
             and name like concat('%',#{name},'%')
@@ -34,7 +34,7 @@
 
 
     <!--根据表达式获取数据-->
-    <select id="queryDataXByExpress" parameterMap="java.lang.String" resultMap="dataxMap">
+    <select id="queryDataXByExpress" parameterType="java.lang.String" resultMap="dataxMap">
         select * from datax
         where status = 1
         <if test="expression != null and expression != ''">

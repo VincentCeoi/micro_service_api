@@ -41,11 +41,11 @@ public class DataXController {
      */
     @RequestMapping("/queryDataXList")
     public List<DataX> queryDataXList(HttpServletRequest request,
-                                      @RequestParam("pageNum")Integer pageNum,
-                                      @RequestParam("limit")Integer limit,
-                                      @RequestParam("name")String name,
-                                      @RequestParam("startTime")String startTime,
-                                      @RequestParam("stopTime")String stopTime){
+                                      @RequestParam(value = "page",required = true)Integer pageNum,
+                                      @RequestParam(value = "limit",required = true)Integer limit,
+                                      @RequestParam(value = "name",required = false)String name,
+                                      @RequestParam(value = "startTime",required = false)String startTime,
+                                      @RequestParam(value = "stopTime",required = false)String stopTime){
         List<DataX> list =null;
         try{
             //创建参数集合
