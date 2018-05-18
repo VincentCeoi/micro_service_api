@@ -3,7 +3,6 @@ package com.lazada.microservice.mapper;
 import com.lazada.microservice.model.DataX;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
