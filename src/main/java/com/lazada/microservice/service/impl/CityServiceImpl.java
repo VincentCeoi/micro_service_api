@@ -20,4 +20,7 @@ public class CityServiceImpl extends AbstractService<City> implements CityServic
     @Resource
     private CityMapper cityMapper;
 
+
+
+
 }

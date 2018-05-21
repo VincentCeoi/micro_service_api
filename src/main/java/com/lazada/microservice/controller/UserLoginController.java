@@ -2,6 +2,8 @@ package com.lazada.microservice.controller;
 
 import com.alibaba.fastjson.JSONObject;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.lazada.microservice.constans.LayUIResult;
 import com.lazada.microservice.constans.ResultConstant;
 import com.lazada.microservice.model.Users;
@@ -231,12 +233,13 @@ public class UserLoginController {
             param.put("name",name);
             param.put("startTime",startTime);
             param.put("stopTime",stopTime);
+            Page<Users> page = PageHelper.startPage(pageNum,limit);
             //调用接口，获取用户列表
             List<Users> list = usersService.queryUsersList(param);
             //填充数据
             result.setCode(0);
             result.setMsg("查询用户列表！");
-            result.setCount(list.size());
+            result.setCount((int)page.getTotal());
             //填充集合数据
             result.setData(list);
         }catch (Exception e){

@@ -20,7 +20,8 @@
         </div>
         <!-- 头部区域（可配合layui已有的水平导航） -->
         <ul class="layui-nav layui-layout-left">
-           <li class="layui-nav-item"><a href="">控制台</a></li>
+            <div style="padding-top: 20px;font-size: 18px;font-weight: bolder;">Lazada LEL - MicroService</div>
+          <!-- <li class="layui-nav-item"><a href="">控制台</a></li>
             <li class="layui-nav-item"><a href="">商品管理</a></li>
             <li class="layui-nav-item"><a href="">用户</a></li>
             <li class="layui-nav-item">
@@ -30,20 +31,21 @@
                     <dd><a href="">消息管理</a></dd>
                     <dd><a href="">授权管理</a></dd>
                 </dl>
-            </li>
+            </li>-->
         </ul>
         <ul class="layui-nav layui-layout-right">
             <li class="layui-nav-item">
                 <a href="javascript:;">
                     <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
-                    贤心
+                    admin
                 </a>
-                <dl class="layui-nav-child">
+                <!--<dl class="layui-nav-child">
                     <dd><a href="">基本资料</a></dd>
                     <dd><a href="">安全设置</a></dd>
-                </dl>
+                </dl>-->
             </li>
-            <li class="layui-nav-item"><a href="">退了</a></li>
+            <li class="layui-nav-item"><a href="javascript:void(0);"
+                    onclick="location.href='../login.html'">退了</a></li>
         </ul>
     </div>
 
@@ -51,17 +53,24 @@
         <div class="layui-side-scroll">
             <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
             <ul class="layui-nav layui-nav-tree"  lay-filter="test">
-                <li class="layui-nav-item layui-nav-itemed">
+                <li class="layui-nav-item "> <!--layui-nav-itemed  默认选中 打开-->
                     <a class="" href="javascript:;">Data X管理</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;">配置列表</a></dd>
-                        <dd><a href="javascript:;">添加配置</a></dd>
+                        <dd><a href="javascript:void(0);"
+                               onclick="switchPage('../layui-html/configList.html')">配置列表</a></dd>
+                        <dd><a href="javascript:void(0);"
+                               onclick="switchPage('../layui-html/addConfig.html')">添加配置</a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
                     <a class="" href="javascript:;">用户管理</a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;">用户列表</a></dd>
+                        <dd><a href="javascript:void(0);"
+                               onclick="switchPage('../layui-html/userList.html')">用户列表</a>
+                        </dd>
+                        <dd><a href="javascript:void(0);"
+                              onclick="switchPage('../layui-html/addUser.html')">添加用户</a>
+                        </dd>
                     </dl>
                 </li>
             </ul>
@@ -70,7 +79,7 @@
 
     <div class="layui-body">
         <!-- 内容主体区域 -->
-        <iframe src="../layui-html/userList.html"id="data-iframe" style="height: 100%;"
+        <iframe src="../layui-html/welcome.html"id="data-iframe" style="height: 100%;"
                 width="90%" height="100%" class="iframeo" name="child"
                 frameborder="0" ></iframe> <!--scrolling="no"-->
     </div>
@@ -81,12 +90,23 @@
     </div>-->
 </div>
 <script src="../layui-resources/layui.js"></script>
+<script src="../js/jquery-1.8.3.min.js"></script>
 <script>
     //JavaScript代码区域
     layui.use('element', function(){
         var element = layui.element;
 
     });
+
+    /**
+     * 切换页面
+     * @param url ：页面路径
+     */
+    function switchPage(url){
+        //切换页面
+        $("#data-iframe").attr("src",url);
+    }
+
 </script>
 </body>
 </html>

@@ -1,7 +1,10 @@
 package com.lazada.microservice.controller;
 
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.PageHelper;
 import com.lazada.microservice.constans.BasicResult;
+import com.lazada.microservice.constans.LayUIResult;
 import com.lazada.microservice.model.DataX;
 import com.lazada.microservice.quartz.QuartzManager;
 import com.lazada.microservice.service.DataXService;
@@ -29,6 +32,9 @@ public class DataXController {
    @Resource
    private BasicResult basicResult;
 
+   @Resource
+   private LayUIResult layUIResult;
+
     /**
      * 日期格式对象
      */
@@ -40,26 +46,29 @@ public class DataXController {
      * @return
      */
     @RequestMapping("/queryDataXList")
-    public List<DataX> queryDataXList(HttpServletRequest request,
+    public LayUIResult queryDataXList(HttpServletRequest request,
                                       @RequestParam(value = "page",required = true)Integer pageNum,
                                       @RequestParam(value = "limit",required = true)Integer limit,
                                       @RequestParam(value = "name",required = false)String name,
                                       @RequestParam(value = "startTime",required = false)String startTime,
                                       @RequestParam(value = "stopTime",required = false)String stopTime){
-        List<DataX> list =null;
         try{
             //创建参数集合
             Map<String,Object> param = new HashMap<>();
-            param.put("first",(pageNum - 1) *limit);
-            param.put("size",limit);
             param.put("name",name);
             param.put("startTime",startTime);
             param.put("stopTime",stopTime);
-            list = dataXService.queryList(param);
+            //调用pageHelper
+            Page<DataX> page = PageHelper.startPage(pageNum,limit);
+            List<DataX> list = dataXService.queryList(param);
+            layUIResult.setData(list);
+            layUIResult.setMsg("配置列表");
+            layUIResult.setCode(0);
+            layUIResult.setCount((int)page.getTotal());
         }catch (Exception e){
             e.printStackTrace();
         }
-        return list;
+        return layUIResult;
     }
 
 

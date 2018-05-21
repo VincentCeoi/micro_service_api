@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -32,8 +33,8 @@
 <script src="../js/parent.js" charset="utf-8"></script>
 
 <script type="text/html" id="barDemo">
-    <a class="layui-btn layui-btn-mini" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="del">删除</a>
+    <a class="layui-btn layui-btn-mini" lay-event="edit">修改</a>
+    <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="del">弃用</a>
 </script>
 
 <script>
@@ -43,14 +44,15 @@
         //方法级渲染
         table.render({
             elem: '#LAY_table_user'
-            ,url: alldata.path+'user/userList'
+            ,url: alldata.path+'dataX/queryDataXList'
             ,cols: [[
-                {checkbox: true, fixed: true}
-                ,{field:'name', title: '用户名', width:180}
-                ,{field:'status', title: '状态', width:80, sort: true}
-                ,{field:'createTime', title: '创建时间', width:180}
-                ,{field:'', title: '操作', width:180,toolbar:'#barDemo'}
-
+                {field:'name', width:160, title: '同步说明', sort: true}
+                ,{field:'filename', width:180, title: '文件名'}
+                ,{field:'expression', width:120, title: '表达式', sort: true}
+                ,{field:'createtime', width:140, title: '创建时间'}
+                ,{field:'modifytime', width:140, title: '修改时间'}
+                ,{field:'status', width:100, title: '是否可用'}
+                ,{field:'', width:180, title: '操作',toolbar:"#barDemo"}
             ]]
             ,id: 'testReload'
             ,page: true
@@ -81,6 +83,7 @@
         });
 
 
+
         //监听表格复选框选择
         table.on('checkbox(user)', function(obj){
             console.log(obj)
@@ -95,7 +98,7 @@
                 });
             } else if(obj.event === 'edit'){
                 /*layer.alert('编辑行：<br>'+ JSON.stringify(data))*/
-                $("#data-iframe",parent.document).attr("src","../layui-html/modifyUser.html");
+                $("#data-iframe",parent.document).attr("src","../layui-html/modifyConfig.html");
 
             }
         });

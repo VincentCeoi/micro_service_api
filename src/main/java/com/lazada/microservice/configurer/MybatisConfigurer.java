@@ -39,9 +39,9 @@ public class MybatisConfigurer {
         //添加插件
         factory.setPlugins(new Interceptor[]{pageHelper});
 
-       /* //添加XML目录
+       //添加XML目录
         ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver();
-        factory.setMapperLocations(resolver.getResources("classpath:mybatis*//*.xml"));*/
+        factory.setMapperLocations(resolver.getResources("classpath*:/mybatis/*.xml"));
         return factory.getObject();
     }
 

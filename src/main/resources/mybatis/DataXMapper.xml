@@ -26,9 +26,6 @@
         <if test="stopTime != null and stopTime != ''">
             and create_time <![CDATA[ < ]]> #{stopTime}
         </if>
-        <if test="first != null and size != null">
-            limit #{first},#{size}
-        </if>
         order by createtime,modifytime desc
     </select>
 
