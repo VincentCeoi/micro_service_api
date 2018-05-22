@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 
 /**
@@ -17,6 +18,10 @@ import javax.annotation.Resource;
 @Transactional
 public class PlatformServiceImpl extends AbstractService<Platform> implements PlatformService {
     @Resource
-    private PlatformMapper pflLinehaulMapper;
+    private PlatformMapper platformMapper;
 
+    @Override
+    public List<Platform> queryPlatformList(String name) {
+        return platformMapper.queryPlatformList(name);
+    }
 }

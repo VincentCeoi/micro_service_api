@@ -17,7 +17,25 @@
 </head>
 <body>
 <br/>
-<button class="layui-btn" onclick="addPlatform()">增加</button>
+
+
+<div class="demoTable">
+
+    <div style="margin-top: 20px;"></div>
+    <div class="layui-btn-group">
+        <button class="layui-btn" onclick="addPlatform()">增加</button>
+        <button class="layui-btn" id="deletePlatform">删除</button>
+    </div>
+
+    <div style="float: right">
+        名称：
+        <div class="layui-inline">
+            <input class="layui-input" name="nameParam" id="nameParam" autocomplete="off">
+        </div>
+        <button class="layui-btn" data-type="reload">搜索</button>
+    </div>
+
+</div>
 <table class="layui-hide" id="table_platform" lay-filter="platform"></table>
 <script type="text/html" id="barDemo">
     <a class="layui-btn layui-btn-mini" lay-event="edit">编辑</a>
@@ -33,19 +51,19 @@
 <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
 
 <script>
-    var rowData;
+    var rowData,table,currentPage;
     layui.use('table', function(){
-        var table = layui.table;
+        table = layui.table;
 
         table.render({
             id: 'testReload'
             ,elem: '#table_platform'
             ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
             ,url:alldata.path+'platform/platformList'
-            ,size:10
             ,page: true
             ,cols: [[
-                {field:'id', title: 'ID', sort: true}
+                {checkbox: true, fixed: true}
+                ,{field:'id', title: 'ID', sort: true}
                 ,{field:'name', title: '名称'}
                 ,{field:'tradingName', title: '商品号'}
                 ,{field:'linehaulCode', title: 'linehaul编号'}
@@ -67,6 +85,9 @@
                         $(this).text("不可用")
                     }
                 })
+
+                // 当前页码
+                currentPage = page;
             }
         });
 
@@ -95,6 +116,24 @@
             }
         });
 
+        var $ = layui.$;
+
+        // 查询
+        $('.demoTable .layui-btn').on('click',function(){refresh()});
+
+        // 刷新表格数据
+        function refresh() {
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    curr: currentPage //重新从当前页开始
+                }
+                , where: {
+                    nameParam: $('#nameParam').val()
+                }
+            });
+        }
+
         function editPlatform() {
             layer.open({
                 title :'编辑平台',
@@ -104,6 +143,35 @@
             });
         }
 
+        // 批量删除
+        $("#deletePlatform").on('click',function(){
+            var checkStatus = table.checkStatus('testReload'),
+                ids="";
+            for(var i=0;i<checkStatus.data.length;i++){
+                ids+=checkStatus.data[i].id+",";
+            }
+            if (ids.length<1) {
+                layer.msg("请选择要删除的行");
+                return;
+            }
+            layer.confirm('真的删除行么', function(index) {
+                ids = ids.substr(0, ids.length - 1);
+                console.log('选中：' + ids);
+                $.post(alldata.path + "platform/deleteByIds", {"ids": ids}, function (resu) {
+                    var data = resu;
+                    //判断code
+                    if (data.code == "10000") {
+                        layer.close(index);
+                        layer.msg("删除成功", {icon: 6});
+                        // 刷新表格数据
+                        refresh();
+                    } else {
+                        layer.msg("删除失败", {icon: 5});
+                    }
+
+                });
+            });
+        })
     });
 
     function addPlatform() {
@@ -114,8 +182,6 @@
             area : [ '800px', '500px' ],
         });
     }
-
-
 
 </script>
 

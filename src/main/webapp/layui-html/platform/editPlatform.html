@@ -49,7 +49,7 @@
         <div class="layui-form-item">
             <div class="layui-input-block">
                 <button class="layui-btn" lay-submit lay-filter="formPlatform">立即提交</button>
-                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+                <button type="button" id="reset" class="layui-btn layui-btn-primary">重置</button>
             </div>
         </div>
     </form>
@@ -75,38 +75,53 @@
                 var data = resu;
                 //判断code
                 if(data.code=="10000"){
-                    layer.alert(data.msg,setTimeout(function(){close()},1000));
+                    var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                    parent.layer.close(index);
+                    parent.layer.msg("修改成功", {icon: 6});
+                    // 刷新表格数据
+                    var table = parent.table;
+                    table.reload('testReload', {
+                        page: {
+                            curr: parent.currentPage //当前页码
+                        }
+                        , where: {
+                        }
+                    });
                 }else{
-                    layer.alert(data.msg,setTimeout(function(){close()},1000));
+                    layer.msg("修改失败", {icon: 5});
                 }
 
             });
             return false;
         });
 
+        // 重置为初始数据
+        $('#reset').on('click', function(){
+            // 初始化数据
+            init();
+        });
+
+        // 初始化数据
         init();
 
         function init() {
+            // 选中的编辑行数据
             var data = parent.rowData;
-            console.log(data.status);
             //表单初始赋值
             form.val('example', {
                 "id":data.id
                 ,"name": data.name // "name": "value"
                 ,"tradingName": data.tradingName
                 ,"linehaulCode": data.linehaulCode
-                ,"apiKey": data.apiKey //复选框选中状态
+                ,"apiKey": data.apiKey
             })
+
+            // 复选框的选中状态
             $("input[name='status'][value = "+data.status+"]").attr("checked", "checked");
             form.render("radio","example");
         }
 
     });
 
-    // 关闭windows
-    function close() {
-        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
-        parent.layer.close(index);
-    }
 </script>
 </html>

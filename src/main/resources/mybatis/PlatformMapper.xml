@@ -14,4 +14,13 @@
     <result column="api_key" jdbcType="VARCHAR" property="apiKey" />
     <result column="status" jdbcType="INTEGER" property="status" />
   </resultMap>
+
+  <select id="queryPlatformList" resultMap="BaseResultMap">
+    select * from pfl_linehaul where 1=1
+    <if test="name!=null and name!=''">
+      and name like concat('%',#{name},'%')
+    </if>
+    order by created_at desc
+  </select>
+
 </mapper>

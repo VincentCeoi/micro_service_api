@@ -1,7 +1,7 @@
 package com.lazada.microservice.controller;
 
+import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
-import com.github.pagehelper.PageInfo;
 import com.lazada.microservice.constans.BasicResult;
 import com.lazada.microservice.constans.LayUIResult;
 import com.lazada.microservice.model.Platform;
@@ -49,6 +49,14 @@ public class PlatformController {
         return basicResult;
     }
 
+    @RequestMapping("/deleteByIds")
+    public BasicResult deleteByIds(String ids) {
+        platformService.deleteByIds(ids);
+        basicResult.setMsg("数据删除成功！");
+        basicResult.setCode(10000);
+        return basicResult;
+    }
+
     @PostMapping("/update")
     public BasicResult update(Platform platform) {
         Integer id = platform.getId();
@@ -73,14 +81,15 @@ public class PlatformController {
     }
 
     @RequestMapping("/platformList")
-    public LayUIResult list(@RequestParam(defaultValue = "1") Integer page, @RequestParam(defaultValue = "10") Integer size) {
-        PageHelper.startPage(page, size);
-        List<Platform> list = platformService.findAll();
-        PageInfo pageInfo = new PageInfo(list);
+    public LayUIResult list(@RequestParam(defaultValue = "1") Integer page,
+                            @RequestParam(defaultValue = "10") Integer limit,
+                            @RequestParam(required = false) String nameParam) {
+        Page<Platform> pageInfo = PageHelper.startPage(page, limit);
+        List<Platform> list = platformService.queryPlatformList(nameParam);
         //填充数据
         result.setCode(0);
         result.setMsg("查询用户列表！");
-        result.setCount(new Long(pageInfo.getTotal()).intValue());
+        result.setCount((int) pageInfo.getTotal());
         //填充集合数据
         result.setData(list);
         return result;

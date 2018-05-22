@@ -81,17 +81,25 @@
 
         //监听提交
         form.on('submit(formPlatform)', function(data){
-//            layer.alert(JSON.stringify(data.field), {
-//                title: '最终的提交信息'
-//            });
             //post调用接口
             $.post(alldata.path+"platform/addPlatform",data.field,function (resu) {
                 var data = resu;
                 //判断code
                 if(data.code=="10000"){
-                    layer.alert(data.msg,setTimeout(function(){close()},1000));
+                    var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+                    parent.layer.close(index);
+                    parent.layer.msg("添加成功", {icon: 6});
+                    // 刷新表格数据
+                    var table = parent.table;
+                    table.reload('testReload', {
+                        page: {
+                            curr: parent.currentPage //当前页码
+                        }
+                        , where: {
+                        }
+                    });
                 }else{
-                    layer.alert(data.msg,setTimeout(function(){close()},1000));
+                    layer.msg("添加失败", {icon: 5});
                 }
 
             });
@@ -99,11 +107,5 @@
         });
     });
 
-    // 关闭windows
-    function close() {
-
-        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
-        parent.layer.close(index);
-    }
 </script>
 </html>
