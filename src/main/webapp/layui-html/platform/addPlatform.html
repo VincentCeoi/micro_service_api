@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>添加平台</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../layui-resources/css/layui.css"  media="all">
+</head>
+<body>
+<div id="addPlatform">
+    <form class="layui-form" action="">
+        <div class="layui-form-item">
+            <label class="layui-form-label">名称</label>
+            <div class="layui-input-inline">
+                <input type="text" name="name" required  lay-verify="required" placeholder="请输入名称" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">商品号</label>
+            <div class="layui-input-inline">
+                <input type="text" name="tradingName" required lay-verify="required" placeholder="请输入商品号" autocomplete="off" class="layui-input">
+            </div>
+            <!--<div class="layui-form-mid layui-word-aux">辅助文字</div>-->
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">linehaulCode</label>
+            <div class="layui-input-inline">
+                <input type="text" name="linehaulCode" required lay-verify="required" placeholder="请输入linehaulCode" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+        <div class="layui-form-item">
+            <label class="layui-form-label">Key</label>
+            <div class="layui-input-inline">
+                <input type="text" name="apiKey" required lay-verify="required" placeholder="请输入apiKey" autocomplete="off" class="layui-input">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <label class="layui-form-label">状态</label>
+            <div class="layui-input-block">
+                <input type="radio" name="status" value="1" title="可用" checked>
+                <input type="radio" name="status" value="2" title="不可用">
+            </div>
+        </div>
+
+        <div class="layui-form-item">
+            <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formPlatform">立即提交</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script src="../../js/parent.js" charset="utf-8"></script>
+<script src="../../js/jquery-1.8.3.min.js" charset="utf-8"></script>
+<script src="../../layui-resources/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+
+</body>
+<script>
+//    radio控件不显示的解决方法
+    layui.use('form', function () {
+        var form = layui.form;
+
+/*        //自定义验证规则
+        form.verify({
+            title: function(value){
+                if(value.length < 5){
+                    return '标题至少得5个字符啊';
+                }
+            }
+            ,pass: [/(.+){6,12}$/, '密码必须6到12位']
+            ,content: function(value){
+                layedit.sync(editIndex);
+            }
+        });*/
+
+        //监听提交
+        form.on('submit(formPlatform)', function(data){
+//            layer.alert(JSON.stringify(data.field), {
+//                title: '最终的提交信息'
+//            });
+            //post调用接口
+            $.post(alldata.path+"platform/addPlatform",data.field,function (resu) {
+                var data = resu;
+                //判断code
+                if(data.code=="10000"){
+                    layer.alert(data.msg,setTimeout(function(){close()},1000));
+                }else{
+                    layer.alert(data.msg,setTimeout(function(){close()},1000));
+                }
+
+            });
+            return false;
+        });
+    });
+
+    // 关闭windows
+    function close() {
+
+        var index = parent.layer.getFrameIndex(window.name); //先得到当前iframe层的索引
+        parent.layer.close(index);
+    }
+</script>
+</html>
