@@ -41,4 +41,9 @@ public class DataXServiceImpl implements DataXService {
     public Integer deleteById(Integer id) {
         return dataXMapper.deleteById(id);
     }
+
+    @Override
+    public Integer updateDataXByStatus(Map<String, Object> param) {
+        return dataXMapper.updateDataXByStatus(param);
+    }
 }

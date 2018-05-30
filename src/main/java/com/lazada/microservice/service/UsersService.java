@@ -26,6 +26,26 @@ public interface UsersService {
      */
     List<Users> queryUsersList(Map<String,Object> param);
 
+    /**
+     * 新增用户
+     * @param users ：用户对象
+     * @return
+     */
+    Integer addUsers(Users users);
 
+    /**
+     * 更新用户信息
+     * @param users ：用户对象
+     * @return
+     */
+    Integer updateUsers(Users users);
+
+
+    /**
+     * 单个，批量删除用户信息
+     * @param id ：用户ID字符串
+     * @return
+     */
+    Integer deleteUsers(@Param("idStr")String idStr);
 
 }

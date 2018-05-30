@@ -9,6 +9,8 @@ import com.lazada.microservice.model.DataX;
 import com.lazada.microservice.quartz.QuartzManager;
 import com.lazada.microservice.service.DataXService;
 import com.lazada.microservice.util.DataXUtil;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -93,16 +95,18 @@ public class DataXController {
             //判断定时表达式
             String expre = request.getParameter("expre");
             //判断是那种表达式
-            if (expre != null && !"".equals(expre) && expre.equals("all")) {
+            if (expre != null && !"".equals(expre) && expre.equals("day")) {
                 //获取表达式值
-                String express = request.getParameter("expressTime");
+                String express = request.getParameter("expressDate");
                 //调用转换函数
                 expression = DataXUtil.convertExpression(express,1);
             } else {
                 //获取表达式值
-                String express = request.getParameter("expressDate");
+                String express = request.getParameter("expressTime");
+                //判断选中值
+                Integer type = expre.equals("min")?2:3;
                 //调用转换函数
-                expression = DataXUtil.convertExpression(express,2);
+                expression = DataXUtil.convertExpression(express,type);
             }
             dataX.setExpression(expression);
             dataX.setName(name);
@@ -119,43 +123,49 @@ public class DataXController {
                 dataX.setFilename(fileJson.substring(fileJson.indexOf("sync")));
                 dataX.setStatus(1);
             }
+            //判断是否通过
+            if(boo){
+                //添加数据
+                Integer count = dataXService.saveDatax(dataX);
+                //判端是否为空
+                if(count <= 0 ){
+                    basicResult.setCode(10001);
+                    basicResult.setMsg("配置异常！");
+                    //删除文件
+                    deleteFile(fileJson);
+                }else{
+                    //添加/修改 任务
+                    boolean result = result(expression,dataX);
+                    //判断是否成功
+                    if(!result){
+                        basicResult.setCode(10001);
+                        basicResult.setMsg("配置失败！");
+                        //删除文件
+                        deleteFile(fileJson);
+                        //删除记录
+                        dataXService.deleteById(dataX.getId());
+                    }else{
+                        basicResult.setCode(10000);
+                        basicResult.setMsg("配置成功！");
+                    }
+                }
+            }else{
+                basicResult.setCode(10001);
+                basicResult.setMsg("配置失败！");
+                //删除文件
+                deleteFile(fileJson);
+                //删除记录
+                dataXService.deleteById(dataX.getId());
+            }
         }catch (Exception e){
             boo = false;
+            //删除文件
+            deleteFile(fileJson);
+            //删除记录
+            dataXService.deleteById(dataX.getId());
             e.printStackTrace();
             basicResult.setCode(10001);
             basicResult.setMsg("配置异常！");
-        }
-        //判断是否通过
-        if(boo){
-            //添加数据
-            Integer count = dataXService.saveDatax(dataX);
-            //判端是否为空
-            if(count <= 0 ){
-                basicResult.setCode(10001);
-                basicResult.setMsg("配置异常！");
-                //删除文件
-                deleteFile(fileJson);
-            }else{
-                //添加/修改 任务
-                boolean result = result(expression,dataX);
-                //判断是否成功
-                if(!result){
-                    basicResult.setCode(10001);
-                    basicResult.setMsg("配置失败！");
-                    //删除文件
-                    deleteFile(fileJson);
-                    //删除记录
-                    dataXService.deleteById(dataX.getId());
-                }else{
-                    basicResult.setCode(10000);
-                    basicResult.setMsg("配置成功！");
-                }
-            }
-        }else{
-            basicResult.setCode(10001);
-            basicResult.setMsg("配置失败！");
-            //删除文件
-            deleteFile(fileJson);
         }
         //返回结果
         return basicResult;
@@ -196,6 +206,7 @@ public class DataXController {
      * @param request ：请求对象
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     @RequestMapping("/modifyDataX")
     public BasicResult modifyDataX(HttpServletRequest request){
         //创建Data X 对象
@@ -206,6 +217,10 @@ public class DataXController {
         String expression = null;
         //创建变量，接收状态
         Integer status = 2;
+        //创建变量，接收文件名
+        String fileName = "";
+        //创建变量，接收原有文件内容，用于文件回滚
+        String content = "";
         try {
             //获取对象ID
             Integer id = Integer.valueOf(request.getParameter("id"));
@@ -214,22 +229,24 @@ public class DataXController {
             //获取配置的信息
             String name = request.getParameter("name");
             //获取文件名
-            String fileName = request.getParameter("fileName");
+            fileName = request.getParameter("fileName");
             //获取创建时间
             String createTime = request.getParameter("createTime");
             //判断定时表达式
             String expre = request.getParameter("expre");
             //判断是那种表达式
-            if (expre != null && !"".equals(expre) && expre.equals("all")) {
+            if (expre != null && !"".equals(expre) && expre.equals("day")) {
                 //获取表达式值
-                String express = request.getParameter("expressTime");
+                String express = request.getParameter("expressDate");
                 //调用转换函数
                 expression = DataXUtil.convertExpression(express,1);
             } else {
                 //获取表达式值
-                String express = request.getParameter("expressDate");
+                String express = request.getParameter("expressTime");
+                //判断选中值
+                Integer type = expre.equals("min")?2:3;
                 //调用转换函数
-                expression = DataXUtil.convertExpression(express,2);
+                expression = DataXUtil.convertExpression(express,type);
             }
             dataX.setId(id);
             dataX.setExpression(expression);
@@ -239,50 +256,70 @@ public class DataXController {
             dataX.setCreatetime(createTime);
             dataX.setStatus(status);
             dataX.setModifytime(format.format(new Date()));
-            //调用函数，获取要写入的内容
-            String configJson = disposeJson(request);
-            //判断返回是否为空
-            if(configJson == null){
-                //设置值为false
+            //添加数据
+            Integer count = dataXService.updateDatax(dataX);
+            //判端是否为空
+            if(count <= 0){
+                basicResult.setCode(10001);
+                basicResult.setMsg("配置异常！");
                 boo = false;
+            }
+            //判断是否通过
+            if(boo){
+                //调用函数，获取要写入的内容
+                String configJson = disposeJson(request);
+                //判断返回是否为空
+                if(configJson == null){
+                    basicResult.setCode(10001);
+                    basicResult.setMsg("配置数据为空！");
+                    //让数据回滚
+                    throw  new Exception("配置数据为空");
+                }else{
+                    //读取原来的内容 (用于内容回滚)
+                    content = DataXUtil.getDataXJson(fileName);
+                    //调用函数，进行填写内容
+                    boo = DataXUtil.modifyDataXJson(configJson,fileName);
+                    //判断是否写入成功
+                    if(boo){
+                        //判断是否为可用的
+                        if(status == 1){
+                            //添加/修改 任务
+                            boolean result = result(expression,dataX);
+                            //判断是否成功
+                            if(!result){
+                                basicResult.setCode(10001);
+                                basicResult.setMsg("配置失败！");
+                                //回滚文件数据
+                                DataXUtil.modifyDataXJson(content,fileName);
+                                //抛出异常，回滚数据库数据
+                                throw  new Exception("添加任务失败");
+                            }else{
+                                basicResult.setCode(10000);
+                                basicResult.setMsg("配置成功！");
+                            }
+                        }else{
+                            basicResult.setCode(10000);
+                            basicResult.setMsg("配置成功！");
+                        }
+                    }else{
+                        basicResult.setCode(10001);
+                        basicResult.setMsg("配置失败！");
+                        throw  new Exception("写入文件失败");
+                    }
+                }
             }else{
-                //调用函数，进行填写内容
-                boo = DataXUtil.modifyDataXJson(configJson,fileName);
+                basicResult.setCode(10001);
+                basicResult.setMsg("配置写入失败！");
             }
         }catch (Exception e){
             e.printStackTrace();
             boo = false;
             basicResult.setCode(10001);
             basicResult.setMsg("修改配置异常！");
-        }
-        //判断是否通过
-        if(boo){
-            //添加数据
-            Integer count = dataXService.saveDatax(dataX);
-            //判端是否为空
-            if(count <= 0){
-                basicResult.setCode(10001);
-                basicResult.setMsg("配置异常！");
-            }else{
-                if(status == 1){
-                    //添加/修改 任务
-                    boolean result = result(expression,dataX);
-                    //判断是否成功
-                    if(!result){
-                        basicResult.setCode(10001);
-                        basicResult.setMsg("配置失败！");
-                    }else{
-                        basicResult.setCode(10000);
-                        basicResult.setMsg("配置成功！");
-                    }
-                }else{
-                    basicResult.setCode(10000);
-                    basicResult.setMsg("配置成功！");
-                }
-            }
-        }else{
-            basicResult.setCode(10001);
-            basicResult.setMsg("配置失败！");
+            //回滚文件数据
+            DataXUtil.modifyDataXJson(content,fileName);
+            //不影响数据正常混滚
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
         //返回结果
         return basicResult;
@@ -299,15 +336,13 @@ public class DataXController {
      * @param id ：ID
      * @return
      */
+    @Transactional(rollbackFor = Exception.class)
     @RequestMapping("/removeDataX")
     public BasicResult removeDataX(HttpServletRequest request,
-                              @RequestParam(value = "fileName",required = true)String fileName,
-                              @RequestParam(value = "id",required = true)Integer id,
-                              @RequestParam(value = "expression",required = true)String expression,
-                              @RequestParam(value = "name",required = true)String name,
-                              @RequestParam(value = "status",required = true)Integer status,
-                              @RequestParam(value = "createtime",required = true)String createtime,
-                              @RequestParam(value = "modifytime",required = true)String modifytime){
+                                   @RequestParam(value = "fileName",required = true)String fileName,
+                                   @RequestParam(value = "id",required = true)Integer id,
+                                   @RequestParam(value = "expression",required = true)String expression,
+                                   @RequestParam(value = "status",required = true)Integer status){
         //创建对象
         DataX obj = null;
         try {
@@ -315,7 +350,10 @@ public class DataXController {
             String fileNames = null;
             //创建对象
             DataX dataX = new DataX();
-
+            dataX.setId(id);
+            dataX.setStatus(status);
+            dataX.setExpression(expression);
+            //判断是弃用，还是启用
             if(status == 1){
                 fileNames = DataXUtil.modifyFileName(fileName,"sync");
                 dataX.setFilename(fileNames.substring(fileNames.indexOf("sync")));
@@ -323,57 +361,65 @@ public class DataXController {
                 fileNames = DataXUtil.modifyFileName(fileName,"not");
                 dataX.setFilename(fileNames.substring(fileNames.indexOf("not")));
             }
-            dataX.setId(id);
-            dataX.setStatus(status);
-            dataX.setName(name);
-            dataX.setExpression(expression);
-            dataX.setCreatetime(createtime);
-            dataX.setModifytime(modifytime);
-            //调用接口，修改数据
-            Integer count = dataXService.saveDatax(dataX);
-            //判断是否成功
-            if(count <= 0){
-                if(status == 1){
-                    DataXUtil.modifyFileName(fileName,"not");
-                    basicResult.setCode(10001);
-                    basicResult.setMsg("启用失败！");
-                    return basicResult;
+            //判断文件是否写入正常
+            if(fileNames != null){
+                //创建Map集合，存储参数
+                Map<String,Object> param = new HashMap<>();
+                //将参数存入集合
+                param.put("id",id);
+                param.put("status",status);
+                param.put("filename",dataX.getFilename());
+                //调用接口，修改数据
+                Integer count = dataXService.updateDataXByStatus(param);
+                //判断是否成功
+                if(count <= 0){
+                    //判断是弃用还是启用
+                    if(status == 1){
+                        DataXUtil.modifyFileName(fileName,"not");
+                        basicResult.setCode(10001);
+                        basicResult.setMsg("启用失败！");
+                    }else{
+                        DataXUtil.modifyFileName(fileName,"sync");
+                        basicResult.setCode(10001);
+                        basicResult.setMsg("弃用失败！");
+                    }
                 }else{
-                    DataXUtil.modifyFileName(fileName,"sync");
-                    basicResult.setCode(10001);
-                    basicResult.setMsg("弃用失败！");
-                    return basicResult;
+                    //判断是弃用还是启用
+                    if(status == 1){
+                        //判断任务是否添加成功
+                        if(result(expression,obj)){
+                            basicResult.setCode(10000);
+                            basicResult.setMsg("启用成功！");
+                        }else{
+                            DataXUtil.modifyFileName(fileName,"not");
+                            basicResult.setCode(10001);
+                            basicResult.setMsg("启用失败！");
+                            throw new Exception("启用任务添加失败！");
+                        }
+                    }else{
+                        //判断任务是否添加成功
+                        if(result(expression,obj)){
+                            basicResult.setCode(10000);
+                            basicResult.setMsg("弃用成功！");
+                        }else{
+                            DataXUtil.modifyFileName(fileName,"sync");
+                            basicResult.setCode(10001);
+                            basicResult.setMsg("弃用失败！");
+                            throw new Exception("弃用任务添加失败！");
+                        }
+                    }
                 }
+            }else{   //文件名写入错误
+                basicResult.setCode(10001);
+                basicResult.setMsg("文件写入错误！");
             }
         }catch (Exception e){
             e.printStackTrace();
             basicResult.setCode(10001);
             basicResult.setMsg("系统异常！");
-            return basicResult;
+            TransactionAspectSupport.currentTransactionStatus().setRollbackOnly();
         }
-        if(status == 1){
-            DataXUtil.modifyFileName(fileName,"sync");
-            //判断任务是否添加成功
-            if(result(expression,obj)){
-                basicResult.setCode(10000);
-                basicResult.setMsg("启用成功！");
-                return basicResult;
-            }
-            basicResult.setCode(10001);
-            basicResult.setMsg("启用失败！");
-            return basicResult;
-        }else{
-            DataXUtil.modifyFileName(fileName,"not");
-            //判断任务是否添加成功
-            if(result(expression,obj)){
-                basicResult.setCode(10000);
-                basicResult.setMsg("弃用成功！");
-                return basicResult;
-            }
-            basicResult.setCode(10001);
-            basicResult.setMsg("弃用失败！");
-            return basicResult;
-        }
+        return basicResult;
     }
 
 

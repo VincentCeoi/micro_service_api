@@ -18,18 +18,32 @@
 
 <div class="demoTable">
     <div style="margin-top: 20px;"></div>
-    搜索名称：
+    条件搜索：
     <div class="layui-inline">
-        <input class="layui-input" name="id" id="demoReload" autocomplete="off">
+        <input class="layui-input" name="name" id="name" placeholder="用户名" >
+    </div>
+    <div class="layui-inline">
+        <input class="layui-input" name="startTime" id="startTime" placeholder="开始时间" >
+    </div>
+    <div class="layui-inline">
+        <input class="layui-input" name="stopTime" id="stopTime" placeholder="结束时间">
     </div>
     <button class="layui-btn" data-type="reload">搜索</button>
 </div>
+<div style="margin: 10px;" id="add">
+    <button class="layui-btn layui-btn-normal" id="addBtn" data-type="add">添加</button>
+    <button class="layui-btn layui-btn-danger" id="delBtn" data-type="del">删除</button>
+</div>
+
+
 
 <table class="layui-hide" id="LAY_table_user" lay-filter="user"></table>
 
 
 <script src="../layui-resources/layui.js" charset="utf-8"></script>
+<script src="../js/jquery-1.8.3.min.js" charset="utf-8"></script>
 <script src="../js/parent.js" charset="utf-8"></script>
+<script src="../js/addUser.js" charset="utf-8"></script>
 
 <script type="text/html" id="barDemo">
     <a class="layui-btn layui-btn-mini" lay-event="edit">编辑</a>
@@ -37,89 +51,218 @@
 </script>
 
 <script>
-    layui.use('table', function(){
+    layui.use(['table','laydate'], function(){
         var table = layui.table;
-
+        var laydate = layui.laydate;
         //方法级渲染
         table.render({
             elem: '#LAY_table_user'
             ,url: alldata.path+'user/userList'
             ,cols: [[
                 {checkbox: true, fixed: true}
+                ,{field:'id', width:60, title: 'ID'}
                 ,{field:'name', title: '用户名', width:180}
-                ,{field:'status', title: '状态', width:80, sort: true}
+                ,{field:'status', title: '状态', width:80}
                 ,{field:'createTime', title: '创建时间', width:180}
+                ,{field:'email', title: '邮箱', width:180}
                 ,{field:'', title: '操作', width:180,toolbar:'#barDemo'}
-
             ]]
+            //转换函数
+            ,done:function(res, curr, count) {    //res 接口返回的信息
+                $("[data-field = 'status']").children().each(function () {
+                    if ($(this).text() == '1') {
+                        $(this).text("可用");
+                    }
+                })
+            }
             ,id: 'testReload'
             ,page: true
-            ,height: 480
+            ,height: 420
+            ,width:920
         });
 
-        var $ = layui.$, active = {
-            reload: function(){
-                var demoReload = $('#demoReload');
+        //时间选择器
+        laydate.render({
+            elem: '#startTime'
+            ,type:'date'
+        });
+        laydate.render({
+            elem: '#stopTime'
+            ,type:'date'
+        });
 
-                //执行重载
-                table.reload('testReload', {
-                    page: {
-                        curr: 1 //重新从第 1 页开始
-                    }
-                    ,where: {
-                        key: {
-                            id: demoReload.val()
-                        }
-                    }
-                });
-            }
+        //表刷新方法
+        var reloadTable = function () {
+            //搜索的名称
+            var name = $("input[name='name']").val();
+            //开始时间
+            var startTime = $("input[name='startTime']").val();
+            //结束时间
+            var stopTime = $("input[name='stopTime']").val();
+            //刷新表格数据
+            table.reload("testReload", { //此处是上文提到的 初始化标识id
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                //额外参数
+                where: {
+                    name:name,startTime:startTime,stopTime:stopTime
+                }
+            });
         };
 
-        $('.demoTable .layui-btn').on('click', function(){
-            var type = $(this).data('type');
-            active[type] ? active[type].call(this) : '';
-        });
-
-
-        //监听表格复选框选择
-        table.on('checkbox(user)', function(obj){
-            console.log(obj)
-        });
         //监听工具条
         table.on('tool(user)', function(obj){
             var data = obj.data;
             if(obj.event === 'del'){
                 layer.confirm('真的删除行么', function(index){
-                    obj.del();
+                    //参数
+                    var param = {id:data.id};
+                    //调用接口，删除数据
+                    deleteUser(param);
                     layer.close(index);
+                    //刷新表格
+                    reloadTable();
                 });
             } else if(obj.event === 'edit'){
+                //填充数据
+                $("input[name='name']").val(data.name);
+                $("input[name='email']").val(data.email);
+                $("input[name='id']").val(data.id);
+                $("input[name='password']").val("");
+                $("#passwordInput").hide();
+                $("#submitBtn").attr("onclick","submitForm(2)");
+                layer.open({
+                    type: 1,
+                    closeBtn: false,
+                    shift: 2,
+                    shadeClose: true,
+                    content: $("#addPannel")
+                });
                 /*layer.alert('编辑行：<br>'+ JSON.stringify(data))*/
-                $("#data-iframe",parent.document).attr("src","../layui-html/modifyUser.html");
+                //$("#data-iframe",parent.document).attr("src","../layui-html/modifyUser.html");
 
             }
         });
 
-        var $ = layui.$, active = {
-            getCheckData: function(){ //获取选中数据
-                var checkStatus = table.checkStatus('idTest')
-                    ,data = checkStatus.data;
-                layer.alert(JSON.stringify(data));
+
+        //监听搜索按钮
+        $('.demoTable .layui-btn,#addBtn').on('click', function(){
+            //获取当前的按钮
+            var txt = $(this).text();
+            //判断是搜索还是添加
+            if(txt == "添加"){
+                //数据清除
+                $("input[name='name']").val("");
+                $("input[name='email']").val("");
+                //展示
+                $("#passwordInput").show();
+                $("#submitBtn").attr("onclick","submitForm(1)");
+                layer.open({
+                    type: 1,
+                    closeBtn: false,
+                    shift: 2,
+                    shadeClose: true,
+                    content: $("#addPannel")
+                });
+            }else{ //搜索
+                //调用刷新方法
+                reloadTable();
             }
-            ,getCheckLength: function(){ //获取选中数目
-                var checkStatus = table.checkStatus('idTest')
-                    ,data = checkStatus.data;
-                layer.msg('选中了：'+ data.length + ' 个');
+
+        });
+
+        //监听删除按钮
+        $('#delBtn').on('click', function(){
+            //获取复选框选中的数据
+            var checkStatus = table.checkStatus('testReload')
+                ,data = checkStatus.data;
+            //判断是否存在选中的值
+            if(data==null || data == "" || data == undefined){
+                layer.alert("请选择要删除的数据");
+            }else{
+                layer.confirm('真的删除行么', function(index){
+                    //创建变量，接收ID拼接值
+                    var idStr = "";
+                    //遍历选中数据
+                    for(var i = 0; i < data.length;i ++){
+                        idStr += data[i].id+",";
+                    }
+                    //参数
+                    var param = {id:idStr.substring(0,idStr.length-1)}
+                    //调用删除函数
+                    deleteUser(param);
+                    //关闭询问框
+                    layer.close(index);
+                    //刷新表格
+                    reloadTable();
+                });
             }
-            ,isAll: function(){ //验证是否全选
-                var checkStatus = table.checkStatus('idTest');
-                layer.msg(checkStatus.isAll ? '全选': '未全选')
-            }
-        };
+        });
+
+        /**
+         * 删除函数
+         * @param param ：参数
+         */
+        var deleteUser = function (param) {
+            //post调用接口
+            $.post(alldata.path+"user/deleteUser",param,function (resu) {
+                var data = resu;
+                //判断code
+                if(data.code=="10000"){
+                    layer.alert("删除成功！");
+                }else{
+                    layer.alert("删除失败！");
+                }
+            });
+        }
 
 
     });
 </script>
+
+<!--隐藏的弹出表单-->
+<div id="addPannel" style="display: none;padding-top: 20px;">
+<form class="layui-form" id="myForm">
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">用户名</label>
+        <div class="layui-input-inline" style="float: left; ">
+            <input type="text" name="name"
+                   autocomplete="off" placeholder="请输入用户名" class="layui-input">
+            <input type="hidden" name="id" class="layui-input">
+        </div>
+    </div>
+
+    <div class="layui-form-item" id="passwordInput">
+        <div class="layui-inline">
+            <label class="layui-form-label">密码</label>
+            <div class="layui-input-inline">
+                <input type="text" name="password"
+                       autocomplete="off"  class="layui-input">
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-form-item">
+        <label class="layui-form-label">Email 邮箱</label>
+        <div class="layui-input-inline" style="float: left; ">
+            <input type="text" name="email"
+                   autocomplete="off" placeholder="请输入邮箱" class="layui-input">
+        </div>
+    </div>
+
+
+    <div class="layui-form-item">
+        <div class="layui-input-block">
+            <button class="layui-btn" type="button" id="submitBtn"
+                     lay-filter="demo1">立即提交</button>
+            <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+        </div>
+    </div>
+</form>
+</div>
+
 
 </body>
 </html>

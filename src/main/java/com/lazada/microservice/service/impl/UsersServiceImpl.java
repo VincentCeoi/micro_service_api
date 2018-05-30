@@ -26,4 +26,20 @@ public class UsersServiceImpl implements UsersService {
     public List<Users> queryUsersList(Map<String, Object> param) {
         return usersMapper.queryUsersList(param);
     }
+
+
+    @Override
+    public Integer addUsers(Users users) {
+        return usersMapper.insert(users);
+    }
+
+    @Override
+    public Integer updateUsers(Users users) {
+        return usersMapper.updateByPrimaryKey(users);
+    }
+
+    @Override
+    public Integer deleteUsers(String id) {
+        return usersMapper.deleteUsers(id);
+    }
 }

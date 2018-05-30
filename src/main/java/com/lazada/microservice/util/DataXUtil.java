@@ -21,6 +21,11 @@ public class DataXUtil {
      */
     public static String dataxPath;
 
+    /**
+     * 时间格式对象
+     */
+    public static SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
 
     public static void main(String[] args) {
         //定时任务
@@ -293,10 +298,6 @@ public class DataXUtil {
      * @param fileName ：地址 + 文件名
      */
     public static String modifyFileName(String fileName,String name){
-        //获取当前字符串
-        long systemTime = System.currentTimeMillis();
-        //将时间戳转换成日期
-        String date = new SimpleDateFormat("yyyy-MM-dd").format(systemTime);
         //根据URL，获取文件
         File file=new File(jsonPath+"/"+fileName);   //指定文件名及路径
         //创建变量，接收文件名
@@ -304,15 +305,14 @@ public class DataXUtil {
         //判断文件，是否存在
         if(!file.exists()){
             //不用处理
+            return null;
         }else{
             //获取文件名
-            String  filename=file.getAbsolutePath();
-            if(filename.indexOf(".")>=0)
-            {
-                filename   =   filename.substring(0,filename.lastIndexOf("."));
-            }
-            fileNameModify = jsonPath+"/"+name+"-"+date+systemTime+".json";
-            file.renameTo(new   File(fileNameModify));   //改名
+            String  filename= name + fileName.substring(fileName.indexOf("-"));
+            //改名后的文件名
+            fileNameModify = jsonPath+"/"+filename;
+            //改名
+            file.renameTo(new  File(fileNameModify));
         }
         //返回文件名
         return fileNameModify;
@@ -340,7 +340,7 @@ public class DataXUtil {
     /**
      * 将客户端传入的时间，进行转换 定时任务的 表达式
      * @param express ：时间
-     * @param flag ：标识 1 - 时间 2 - 日期
+     * @param flag ：标识 1 - 时间 2 - 分钟 3 - 秒
      * @return
      */
     public static String  convertExpression(String express,Integer flag){
@@ -369,23 +369,15 @@ public class DataXUtil {
                 //打印表达式
                 System.out.println(expression.toString());
                 expressionStr = expression.toString();
-            }  //日期
-            else{
-                //将年份拆分
-                String year = express.substring(0,4);
-                //将月份拆分
-                String month = express.substring(5,7);
-                //拆分日
-                String day = express.substring(8,10);
-                //将小时拆分
-                String hour = express.substring(11,13);
-                //拆分分钟
-                String min = express.substring(14,16);
-                //拆分秒
-                String mis = express.substring(17);
-                //拼接成表达式
-                String expression = mis + " " + min + " " + hour +
-                        " " + day + " " + month + " ? ";
+            }else if(flag.equals(2)){  //分钟
+                //拼接表达式
+                String expression = "0 */"+express+" * * * ?";
+                //打印表达式
+                System.out.println(expression);
+                expressionStr = expression;
+            }else{   //秒
+                //拼接表达式
+                String expression = "*/"+express+" * * * * ?";
                 //打印表达式
                 System.out.println(expression);
                 expressionStr = expression;

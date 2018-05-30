@@ -7,15 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="../layui-resources/css/layui.css"  media="all">
-    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
 
-    <style type="text/css">
 
-        body {
-            background-color: #eeeeee;
-        }
-
-    </style>
 
 
 </head>
@@ -39,7 +32,8 @@
         <div class="layui-input-inline" style="float: left;">
             <select name="expre" lay-filter="timeDispose" >
                 <option value="day">按每天</option>
-                <option value="interval">按间隔</option>
+                <option value="min">按分钟</option>
+                <option value="sens">按秒</option>
             </select>
         </div>
         <div class="layui-inline" >
@@ -49,7 +43,8 @@
                        placeholder="HH:mm:ss" autocomplete="off" class="layui-input">
 
                 <input type="number" name="expressTime" id="expressTime" lay-verify="date"
-                       style="display: none;" placeholder="单位为秒" autocomplete="off" class="layui-input">
+                       style="display: none;" placeholder="请输入 0 - 59 的数字"
+                       autocomplete="off" class="layui-input" min="0" max="59">
             </div>
         </div>
     </div>
@@ -237,9 +232,6 @@
         </div>
     </div>
 
-
-
-
     <div class="layui-form-item">
         <div class="layui-input-block">
             <button class="layui-btn" type="button"
@@ -297,42 +289,8 @@
             }
         });
 
+
     });
-
-    /*$(function () {
-
-        $("select[name='syncMethod']").change(function () {
-            //获取选中的值
-            var val = $(this).val();
-            //判断值 该展示哪一个
-            if(val == "columnSync"){
-                //现实填写列的部分
-                $("#columnMethod").show();
-                $("#splitPk").show();
-                $("#sqlMethod").hide();
-            }else{
-                //现实填写列的部分
-                $("#columnMethod").hide();
-                $("#splitPk").hide();
-                $("#sqlMethod").show();
-            }
-        });
-
-        $("select[name='expre']").change(function () {
-            //获取选中的值
-            var val = $(this).val();
-            //判断值 该展示哪一个
-            if(val == "all"){   //每天
-                $("#expressDate").hide();
-                $("#expressTime").show();
-            }else{   // 指定日期
-                $("#expressTime").hide();
-                $("#expressDate").show();
-            }
-        });
-
-    });*/
-
 
 
 

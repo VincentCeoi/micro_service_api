@@ -42,18 +42,17 @@ var dataX = {
         });
 
     },
-    removeDataX:function (id,fileName,expression,name,status,createtime,modifytime) {
-        var data = {id:id,fileName:fileName,expression:expression,name:name,status:status,
-                    createtime:createtime,modifytime:modifytime};
+    removeDataX:function (id,fileName,expression,status) {
+        var data = {id:id,fileName:fileName,expression:expression,status:status};
         //post调用接口
         $.post(alldata.path+"dataX/removeDataX",data,function (resu) {
             var data = resu;
             //判断code
             if(data.code=="10000"){
-                alert(data.msg);
-                $("#data-iframe",parent.document).attr("src","SyncList.html");
+                return 10000;
+                //$("#data-iframe",parent.document).attr("src","../layui-html/configList.html");
             }else{
-                alert(data.msg);
+                return 10001;
             }
         });
     },

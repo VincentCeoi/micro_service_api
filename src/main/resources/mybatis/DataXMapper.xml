@@ -21,10 +21,10 @@
             and name like concat('%',#{name},'%')
         </if>
         <if test="startTime != null and startTime != ''">
-            and create_time > #{startTime}
+            and createTime > #{startTime}
         </if>
         <if test="stopTime != null and stopTime != ''">
-            and create_time <![CDATA[ < ]]> #{stopTime}
+            and createTime <![CDATA[ < ]]> #{stopTime}
         </if>
         order by createtime,modifytime desc
     </select>
@@ -40,7 +40,8 @@
     </select>
 
     <!--添加数据-->
-    <insert id="saveDatax"  parameterType="com.lazada.microservice.model.DataX">
+    <insert id="saveDatax"  parameterType="com.lazada.microservice.model.DataX"
+            useGeneratedKeys="true" keyProperty="id">
         insert into datax
         <trim prefix="(" suffix=")" suffixOverrides="," >
         <if test="name != null and name != ''" >
@@ -109,6 +110,12 @@
         </trim>
         where id=#{id}
     </update>
+
+    <!-- 弃用/启用 文件-->
+    <update id="updateDataXByStatus" parameterType="java.util.Map">
+        update datax set status = #{status},filename = #{filename} where id = #{id}
+    </update>
+
 
     <!--删除数据-->
     <delete id="deleteById" parameterType="java.lang.Integer">

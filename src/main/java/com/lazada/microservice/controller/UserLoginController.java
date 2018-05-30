@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSONObject;
 
 import com.github.pagehelper.Page;
 import com.github.pagehelper.PageHelper;
+import com.lazada.microservice.constans.BasicResult;
 import com.lazada.microservice.constans.LayUIResult;
 import com.lazada.microservice.constans.ResultConstant;
 import com.lazada.microservice.model.Users;
 import com.lazada.microservice.service.UsersService;
+import com.lazada.microservice.util.DataXUtil;
 import com.lazada.microservice.util.MD5Check;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +37,9 @@ public class UserLoginController {
 
     @Autowired
     private LayUIResult result;
+
+    @Autowired
+    private BasicResult basicResult;
 
     /**
      * 生成验证码
@@ -251,5 +256,120 @@ public class UserLoginController {
         //返回数据
         return result;
     }
+
+
+    /**
+     * 新增或修改用户信息
+     * @param request ：请求对象
+     * @param id ：ID
+     * @param name ：用户名
+     * @param email ：邮箱
+     * @param password ：密码
+     * @return
+     */
+    @RequestMapping("/addOrEditUser")
+    public BasicResult addUserInfo(HttpServletRequest request,
+                                   @RequestParam(value = "id",required = false)Integer id,
+                                   @RequestParam(value = "name",required = true)String name,
+                                   @RequestParam(value = "email",required = true)String email,
+                                   @RequestParam(value = "password",required = false)String password){
+        try{
+            //创建变量，接收返回的MSG
+            String msg = "";
+            //创建变量，接收返回结果值
+            Integer count = 0;
+            //创建用户对象
+            Users user = new Users();
+            user.setId(id);
+            user.setCreateTime(DataXUtil.format.format(new Date()));
+            user.setName(name);
+            user.setEmail(email);
+            user.setStatus(1);
+            //根据用户民获取对象
+            Users userObj = usersService.queryUsersByName(name);
+            //判断密码是否有值，有值则进行加密
+            if(password != null && !"".equals(password)){
+                //判断是否存在
+                if(userObj != null){
+                    basicResult.setCode(10001);
+                    basicResult.setMsg("用户名已存在！");
+                }else{
+                    //调用MD5 加密
+                    String pass = MD5Check.generate(password);
+                    //将密码存入对象中
+                    user.setPassword(pass);
+                    //调用新增接口
+                    count = usersService.addUsers(user);
+                    //判断是否成功
+                    if(count > 0 ){
+                        basicResult.setCode(10000);
+                        basicResult.setMsg("新增用户成功！");
+                    }else{
+                        basicResult.setCode(10001);
+                        basicResult.setMsg("新增用户失败！");
+                    }
+                }
+            }else{
+                //判断用户是否为空
+                if(userObj != null){
+                    //不跟上传的ID相同，则表示已存在要修改的用户名
+                    if(!userObj.getId().equals(id)){
+                        basicResult.setCode(10001);
+                        basicResult.setMsg("用户名已存在！");
+                    }else{
+                        //调用修改接口
+                        count = usersService.updateUsers(user);
+                    }
+                }else{  //为空则不存在，可执行修改
+                    //调用修改接口
+                    count = usersService.updateUsers(user);
+                }
+                //判断是否成功
+                if(count > 0 ){
+                    basicResult.setCode(10000);
+                    basicResult.setMsg("修改用户成功！");
+                }else{
+                    basicResult.setCode(10001);
+                    basicResult.setMsg("修改用户失败！");
+                }
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            basicResult.setCode(10001);
+            basicResult.setMsg("出现异常！");
+        }
+        return basicResult;
+    }
+
+
+    /**
+     * 删除用户信息
+     * @param request ：请求对象
+     * @param id ：ID字符串 ，可单个、批量删除用户
+     * @return
+     */
+    @RequestMapping("/deleteUser")
+    public BasicResult deleteUser(HttpServletRequest request,
+                                  @RequestParam(value = "id",required = true)String id){
+        try {
+            //调用接口，进行删除用户信息
+            Integer count = usersService.deleteUsers(id);
+            //判断受影响的行数
+            if(count <= 0){
+                basicResult.setCode(10001);
+                basicResult.setMsg("用户删除失败！");
+            }else{
+                basicResult.setCode(10000);
+                basicResult.setMsg("成功删除用户！");
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            basicResult.setCode(10001);
+            basicResult.setMsg("出现异常！");
+        }
+        return basicResult;
+    }
+
+
 
 }

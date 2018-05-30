@@ -9,13 +9,14 @@
     <result column="create_time" jdbcType="VARCHAR" property="createTime" />
     <result column="status" jdbcType="INTEGER" property="status" />
     <result column="role_id" jdbcType="INTEGER" property="roleId" />
+      <result column="email" jdbcType="VARCHAR" property="email" />
   </resultMap>
 
 
     <!--获取用户列表-->
     <select id="queryUsersList" parameterType="java.util.Map" resultMap="usersMap">
         select * from users
-        where 1=1
+        where status = 1
         /*用户名模糊查询*/
         <if test="name != null and name != ''">
             and name like concat('%',#{name},'%')
@@ -26,17 +27,20 @@
         <if test="stopTime != null and stopTime != ''">
             and create_time <![CDATA[ < ]]> #{stopTime}
         </if>
-        <!--<if test="first != null and size != null">
-            limit #{first},#{size}
-        </if>-->
+
     </select>
 
 
-    <!--根据分页、各种条件查询公告数据-->
+    <!--根据名称查询用户对象-->
     <select id="queryUsersByName" parameterType="java.lang.String" resultMap="usersMap">
         select * from users
         where  name  = #{name}
     </select>
+
+    <!--删除用户-->
+    <update id="deleteUsers" parameterType="java.lang.String">
+        update users set status = 2 where id  in (${idStr})
+    </update>
 
 
 </mapper>

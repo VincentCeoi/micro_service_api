@@ -40,8 +40,11 @@ public class QuartzManager {
         future = threadPoolTaskScheduler.schedule(() -> {
                     //遍历文件名数组
                     for(DataX dataX : list){
-                        //调用函数，进行执行同步文件
-                        DataXUtil.executeSyc(dataX.getFilename());
+                        //判断是否为，禁用文件
+                        if(dataX.getFilename().indexOf("sync") != -1){
+                            //调用函数，进行执行同步文件
+                            DataXUtil.executeSyc(dataX.getFilename());
+                        }
                     }
                 },
                 new CronTrigger(expression));

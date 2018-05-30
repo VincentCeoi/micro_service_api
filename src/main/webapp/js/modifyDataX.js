@@ -56,8 +56,10 @@ function fullFormData(){
                 $("input[name='querySql']").val(querySql);
                 //设置下拉选中
                 $("option[value='sqlSync']").attr("selected","selected");
-                //调用change事件
-                $("select[name='syncMethod']").change();
+                //隐藏元素
+                $("#splitPk").hide();
+                $("#columnMethod").hide();
+                $("#sqlMethod").show();
             }
             //获取列名，表名
             else{
@@ -71,8 +73,10 @@ function fullFormData(){
                 $("input[name='outColumn']").val(outColumnStr);
                 //设置下拉选中
                 $("option[value='columnSync']").attr("selected","selected");
-                //调用change事件
-                $("select[name='syncMethod']").change();
+                //隐藏元素
+                $("#sqlMethod").hide();
+                $("#splitPk").show();
+                $("#columnMethod").show();
             }
             /***************************************获取写入块************************************************/
             //获取写入模型
@@ -116,7 +120,7 @@ function fullFormData(){
             $("input[name='status']").val(status);   //状态
             $("input[name='fileName']").val(fileName);
             //处理表达式
-            if(expression.indexOf("?")){  //标识为每天执行
+            if(expression.indexOf("/") == -1){  //标识为每天执行
                 //将表达式拆分 [小时]
                 var hour = expression.substring(6,8);
                 //拆分分钟
@@ -126,13 +130,31 @@ function fullFormData(){
                 //将时分秒进行拼接
                 var time = hour+":"+min+":"+mis;
                 //进行填充
-                $("input[name='expressTime']").val(time);
+                $("input[name='expressDate']").val(time);
+                //隐藏数据
+                $("input[name='expressTime']").hide();
+                $("input[name='expressDate']").show();
+                $("option[value='day']").attr("selected",true);
             }else{   //指定日期执行
-                /*
-                //拆分表达式
-
+                //将 / 前的字符
+                var cornValue = expression.substring(expression.indexOf("/"));
+                //截取 / - * 号之间的字符
+                cornValue = cornValue.substring(cornValue.indexOf("/")+1,cornValue.indexOf("*"));
+                //获取 / 的位置
+                var index= expression.indexOf("/");
+                //判断 选中哪一个
+                if(index > 1){
+                    //分钟选中
+                    $("option[value='min']").attr("selected",true);
+                }else{
+                    //选中秒
+                    $("option[value='sens']").attr("selected",true);
+                }
                 //进行填充
-                $("input[name='expressDate']").val(dateTime);*/
+                $("input[name='expressTime']").val(cornValue.trim());
+                //隐藏数据
+                $("input[name='expressDate']").hide();
+                $("input[name='expressTime']").show();
             }
             $("input[name='outUserName']").val(outUserName);  //数据源用户名
             $("input[name='outPassword']").val(outPassword);  //数据源密码
@@ -171,7 +193,7 @@ function submitForm(){
         //判断是否成功
         if(resu.code == "10000"){
             alert(resu.msg);
-            $("#data-iframe",parent.document).attr("src","SyncList.html");
+            $("#data-iframe",parent.document).attr("src","../layui-html/configList.html?"+new Date().getTime());
         }else{
             alert(resu.msg);
         }

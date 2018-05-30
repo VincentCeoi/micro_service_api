@@ -1,14 +1,14 @@
 package com.lazada.microservice.mapper;
 
+import com.lazada.microservice.core.Mapper;
 import com.lazada.microservice.model.Users;
-import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 import java.util.Map;
 
-@Mapper
-public interface UsersMapper{
+
+public interface UsersMapper  extends Mapper<Users> {
 
 
     /**
@@ -25,5 +25,13 @@ public interface UsersMapper{
      * @return
      */
     List<Users> queryUsersList(Map<String,Object> param);
+
+
+    /**
+     * 单个，批量删除用户信息
+     * @param id ：用户ID字符串
+     * @return
+     */
+    Integer deleteUsers(@Param("idStr")String id);
 
 }

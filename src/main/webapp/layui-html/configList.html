@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>layui</title>
+    <title>MicroService</title>
     <meta name="renderer" content="webkit">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -19,9 +19,15 @@
 
 <div class="demoTable">
     <div style="margin-top: 20px;"></div>
-    搜索名称：
+    条件搜索：
     <div class="layui-inline">
-        <input class="layui-input" name="id" id="demoReload" autocomplete="off">
+        <input class="layui-input" name="name" id="name" placeholder="同步说明" >
+    </div>
+    <div class="layui-inline">
+        <input class="layui-input" name="startTime" id="startTime" placeholder="开始时间" >
+    </div>
+    <div class="layui-inline">
+        <input class="layui-input" name="stopTime" id="stopTime" placeholder="结束时间">
     </div>
     <button class="layui-btn" data-type="reload">搜索</button>
 </div>
@@ -38,90 +44,134 @@
 </script>
 
 <script>
-    layui.use('table', function(){
+    layui.use(['table','laydate','jquery'], function(){
         var table = layui.table;
-
+        var laydate = layui.laydate;
+        var $ = layui.$;
         //方法级渲染
         table.render({
             elem: '#LAY_table_user'
             ,url: alldata.path+'dataX/queryDataXList'
+            ,method:"POST"
             ,cols: [[
-                {field:'name', width:160, title: '同步说明', sort: true}
+                {field:'id', width:60, title: 'ID'}
+                ,{field:'name', width:160, title: '同步说明'}
                 ,{field:'filename', width:180, title: '文件名'}
-                ,{field:'expression', width:120, title: '表达式', sort: true}
+                ,{field:'expression', width:120, title: '表达式'}
                 ,{field:'createtime', width:140, title: '创建时间'}
                 ,{field:'modifytime', width:140, title: '修改时间'}
                 ,{field:'status', width:100, title: '是否可用'}
                 ,{field:'', width:180, title: '操作',toolbar:"#barDemo"}
             ]]
+            //转换函数
+            ,done:function(res, curr, count) {    //res 接口返回的信息
+                $("[data-field = 'status']").children().each(function () {
+                    if ($(this).text() == 1) {
+                        $(this).text("可用");
+                        $(this).parent("td").next("td").children("div").children("a:eq(1)").text("弃用");
+                    } else {
+                        $(this).text("不可用");
+                        $(this).parent("td").next("td").children("div").children("a:eq(1)").text("启用");
+                    }
+                })
+            }
             ,id: 'testReload'
             ,page: true
-            ,height: 480
+            ,height: 460
+            ,width:1091
         });
 
-        var $ = layui.$, active = {
-            reload: function(){
-                var demoReload = $('#demoReload');
+        //时间选择器
+        laydate.render({
+            elem: '#startTime'
+            ,type:'date'
+        });
+        laydate.render({
+            elem: '#stopTime'
+            ,type:'date'
+        });
 
-                //执行重载
-                table.reload('testReload', {
-                    page: {
-                        curr: 1 //重新从第 1 页开始
-                    }
-                    ,where: {
-                        key: {
-                            id: demoReload.val()
-                        }
-                    }
-                });
-            }
+
+        //表刷新方法
+        var reloadTable = function () {
+            //搜索的名称
+            var name = $("input[name='name']").val();
+            //开始时间
+            var startTime = $("input[name='startTime']").val();
+            //结束时间
+            var stopTime = $("input[name='stopTime']").val();
+            //刷新表格数据
+            table.reload("testReload", { //此处是上文提到的 初始化标识id
+                page: {
+                    curr: 1 //重新从第 1 页开始
+                },
+                //额外参数
+                where: {
+                    name:name,startTime:startTime,stopTime:stopTime
+                }
+            });
         };
+        //弃用 、启用 DataX 配置
+        var removeDataX = function(id,fileName,expression,status){
+            var data = {id:id,fileName:fileName,expression:expression,status:status};
+            //post调用接口
+            $.post(alldata.path+"dataX/removeDataX",data,function (resu) {
+                var data = resu;
+                var txt = status == 1?"启用":"弃用";
+                //判断code
+                if(data.code=="10000"){
+                    layer.alert(txt+"成功！");
+                }else{
+                    layer.alert(txt+"失败！");
+                }
+            });
+        }
 
-        $('.demoTable .layui-btn').on('click', function(){
-            var type = $(this).data('type');
-            active[type] ? active[type].call(this) : '';
-        });
 
-
-
-        //监听表格复选框选择
-        table.on('checkbox(user)', function(obj){
-            console.log(obj)
-        });
         //监听工具条
         table.on('tool(user)', function(obj){
             var data = obj.data;
             if(obj.event === 'del'){
-                layer.confirm('真的删除行么', function(index){
-                    obj.del();
+                //获取按钮的值
+                var txt = $(this).text();
+                var $btn = $(this);
+                //提示
+                layer.confirm('确定'+txt+'么？', function(index){
+                    //调用弃用接口
+                    removeDataX(data.id,data.filename,data.expression,data.status==1?2:1);
+                   // obj.del();   //删除元素
                     layer.close(index);
+                    //调用函数，重载table
+                    reloadTable();
                 });
             } else if(obj.event === 'edit'){
-                /*layer.alert('编辑行：<br>'+ JSON.stringify(data))*/
+                //layer.alert('编辑行：<br>'+ JSON.stringify(data));
+                //获取文件名
+                $("input[name='fileName']",parent.document).val(data.filename);
+                //获取操作说明
+                 $("input[name='name']",parent.document).val(data.name);
+                //获取表达式
+                $("input[name='expression']",parent.document).val(data.expression);
+                //获取修改时间
+                $("input[name='createTime']",parent.document).val(data.createtime);
+                //获取ID
+                $("input[name='id']",parent.document).val(data.id);
+                //获取状态
+                $("input[name='status']",parent.document).val(data.status);
+                //更换 ifream 的 src 值
                 $("#data-iframe",parent.document).attr("src","../layui-html/modifyConfig.html");
-
             }
         });
 
-        var $ = layui.$, active = {
-            getCheckData: function(){ //获取选中数据
-                var checkStatus = table.checkStatus('idTest')
-                    ,data = checkStatus.data;
-                layer.alert(JSON.stringify(data));
-            }
-            ,getCheckLength: function(){ //获取选中数目
-                var checkStatus = table.checkStatus('idTest')
-                    ,data = checkStatus.data;
-                layer.msg('选中了：'+ data.length + ' 个');
-            }
-            ,isAll: function(){ //验证是否全选
-                var checkStatus = table.checkStatus('idTest');
-                layer.msg(checkStatus.isAll ? '全选': '未全选')
-            }
-        };
+        //监听搜索按钮
+        $('.demoTable .layui-btn').on('click', function(){
+            //调用刷新方法
+            reloadTable();
+        });
 
 
     });
+
 </script>
 
 </body>

@@ -1,6 +1,7 @@
 //存储父级数据
 
 var alldata = {
+    //url 前缀
     path:"http://localhost:8084/lineHual/",
     /**
      * 校验表单非空数据
@@ -16,11 +17,16 @@ var alldata = {
     //获取选项值
     var expre = $("select[name='expre']").val();
     //判断
-    if(expre == "all"){
+    if(expre != "day"){
         //获取name对象
         var $expressTime = $("input[name='expressTime']");
         //校验
         if(!alldata.clickNotNull($expressTime,"定时处理")){
+            return false;
+        }
+        //判断是否在规定的限制内
+        if($expressTime.val()< 0 || $expressTime.val() > 59){
+            alert("定时处理只能是0 - 59之间！");
             return false;
         }
     }else{
@@ -157,4 +163,46 @@ var alldata = {
         return true;
     }
 }
+    /**
+     * 用户添加、修改校验
+     * @param flag ：标识 1 - 新增  2 - 修改
+     * @returns {boolean}
+     */
+    ,addUserValid:function (flag) {
+
+        var range =  new RegExp(/^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/);
+
+        //获取名称
+        var $name = $("#myForm input[name='name']");
+        var a = $name.val();
+        //调用是否为空
+        if(!alldata.clickNotNull($name,"用户名")){
+            return false;
+        }
+        //判断是否需要获取密码
+        if(flag == 1){   //新增
+            //获取密码
+            var $password = $("#myForm input[name='password']");
+            //调用是否为空
+            if(!alldata.clickNotNull($password,"密码")){
+                return false;
+            }
+        }
+        //获取邮箱
+        var $email = $("#myForm input[name='email']");
+        //调用是否为空
+        if(!alldata.clickNotNull($email,"邮箱")){
+            return false;
+        }
+        //邮箱格式校验
+        if(!range.test($email.val())){
+            alert("邮箱格式不正确！");
+            return false;
+        }
+
+        return true;
+    }
+
+
+
 }

@@ -20,11 +20,18 @@ public interface DataXService {
 
 
 
-    public Integer saveDatax(DataX dataX);
+    public Integer saveDatax(DataX dataX) throws Exception;
 
 
     public Integer updateDatax(DataX dataX);
 
     public Integer deleteById(@Param("id") Integer id);
+
+    /**
+     * 批量处理 启用/弃用  文件
+     * @param param ：参数集合
+     * @return
+     */
+    public Integer updateDataXByStatus(Map<String,Object> param);
 
 }

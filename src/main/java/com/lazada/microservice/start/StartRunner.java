@@ -39,8 +39,8 @@ public class StartRunner implements CommandLineRunner {
         //将注入的数据，存入静态变量中
         DataXUtil.dataxPath = dataXExePath;
         DataXUtil.jsonPath = dataXJsonPath;
-        //调用接口，获取数据
-        List<DataX> dataXList = dataXService.queryList(null);
+        //调用接口，获取数据 [取状态为 1 ，可用的数据]
+        List<DataX> dataXList = dataXService.queryDataXByExpress(null);
         //调用过滤函数
         Map<String,List<DataX>> map = filterExpression(dataXList);
         //遍历map
