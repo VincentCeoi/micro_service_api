@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <link rel="stylesheet" href="../../layui-resources/css/layui.css" media="all">
+    <meta id="i18n_pagename" content="common-platform">
     <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
     <style type="text/css">
         .layui-table-cell{
@@ -23,37 +24,52 @@
 
     <div style="margin-top: 20px;"></div>
     <div class="layui-btn-group">
-        <button class="layui-btn" onclick="addPlatform()">增加</button>
-        <button class="layui-btn" id="deletePlatform">删除</button>
+        <button class="layui-btn" onclick="addPlatform()"><label class="i18n" name="add"/></button>
+        <button class="layui-btn" id="deletePlatform"><label class="i18n" name="del"/></button>
     </div>
 
     <div style="float: right">
-        名称：
+        <label class="i18n" name="name"/>
         <div class="layui-inline">
             <input class="layui-input" name="nameParam" id="nameParam" autocomplete="off">
         </div>
-        <button class="layui-btn" data-type="reload">搜索</button>
+        <button class="layui-btn" data-type="reload"><label class="i18n" name="search"/>
+        </button>
     </div>
 
 </div>
 <table class="layui-hide" id="table_platform" lay-filter="platform"></table>
+
+<script type="text/html" id="switchStatus">
+    <!-- 这里的 checked 的状态只是演示 -->
+    <input type="checkbox" name="sex" value="{{d.id}}" lay-skin="switch" lay-text="ON|OFF" lay-filter="statusLay" {{ d.status == 1 ? 'checked' : 'unchecked' }}>
+</script>
+
 <script type="text/html" id="barDemo">
-    <a class="layui-btn layui-btn-mini" lay-event="edit">编辑</a>
-    <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="del">删除</a>
+    <a class="layui-btn layui-btn-mini" lay-event="edit"><label name="edit"/></a>
+    <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="del"><label name="del"/></a>
 </script>
 </body>
 
 
-
 <script src="../../js/parent.js" charset="utf-8"></script>
-<script src="../../js/jquery-1.8.3.min.js" charset="utf-8"></script>
+<!--<script src="../../js/jquery-1.8.3.min.js" charset="utf-8"></script>-->
 <script src="../../layui-resources/layui.js" charset="utf-8"></script>
+<script src="../../js/jquery.js "></script>
+<!-- 加载语言包文件 -->
+<script src="../../js/jquery.i18n.properties.js"></script>
+<script src="../../js/language.js"></script>
 <!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
 
 <script>
     var rowData,table,currentPage;
-    layui.use('table', function(){
-        table = layui.table;
+        var i18n=jQuery.i18n;
+
+
+
+    layui.use(['table'], function(){
+        table = layui.table,
+            form=layui.form;
 
         table.render({
             id: 'testReload'
@@ -64,30 +80,49 @@
             ,cols: [[
                 {checkbox: true, fixed: true}
                 ,{field:'id', title: 'ID', sort: true}
-                ,{field:'name', title: '名称'}
-                ,{field:'tradingName', title: '商品号'}
-                ,{field:'linehaulCode', title: 'linehaul编号'}
-                ,{field:'apiKey', title: 'key'}
-                ,{field:'createdAt',  title: '创建时间'}
-                ,{field:'updatedAt',  title: '更新时间'}
-                ,{field:'status',  title: '状态',sort: true}
-                ,{field:'right', title: '操作',toolbar:"#barDemo"}
+                ,{field:'name', title: i18n.prop("name")}
+                ,{field:'tradingName', title: i18n.prop("trading_name")}
+                ,{field:'linehaulCode', title: i18n.prop("linehaul_code")}
+                ,{field:'apiKey', title: i18n.prop("key")}
+                ,{field:'createdAt',  title: i18n.prop("created_at")}
+                ,{field:'updatedAt',  title: i18n.prop("updated_at")}
+                ,{field:'status', title:i18n.prop("status"), templet: '#switchStatus', unresize: true}
+                ,{field:'', title: i18n.prop("operation"),toolbar:"#barDemo"}
             ]]
             ,done: function(res, page, count){
                 //如果是异步请求数据方式，res即为你接口返回的信息。
                 //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
 
-                //分类显示中文名称
-                $("[data-field='status']").children().each(function(){
-                    if($(this).text()=='1'){
-                        $(this).text("可用")
-                    }else if($(this).text()=='2'){
-                        $(this).text("不可用")
-                    }
-                })
-
                 // 当前页码
                 currentPage = page;
+
+                // 处理toolbar国际化
+                var edits=document.getElementsByName("edit");
+                for(var i=0;i<edits.length;i++)
+                {
+                    edits[i].innerText=i18n.prop("edit");
+                }
+                var dels=document.getElementsByName("del");
+                for(var i=0;i<dels.length;i++)
+                {
+                    dels[i].innerText=i18n.prop("del");
+                }
+            }
+        });
+
+        //监听状态开关操作
+        form.on('switch(statusLay)', function(obj){
+            var id = this.value;
+            var subThis = this;
+
+            if (!obj.elem.checked) {
+                layer.confirm(i18n.prop("off_confirm"),{icon: 3, title:i18n.prop("tips"),btn: [i18n.prop("confirm"), i18n.prop("cancel")]}, function (index) {
+                    updateStatus(id,2);
+                });
+            } else {
+                layer.confirm(i18n.prop("on_confirm"),{icon: 3, title:i18n.prop("tips"),btn: [i18n.prop("confirm"), i18n.prop("cancel")]}, function (index) {
+                    updateStatus(id,1);
+                });
             }
         });
 
@@ -96,7 +131,7 @@
             var data = obj.data;
             rowData = data;
             if(obj.event === 'del'){
-                layer.confirm('真的删除行么', function(index){
+                layer.confirm(i18n.prop("del_confirm"), function(index){
 
                     $.post(alldata.path+"platform/delete/"+data.id,{},function (resu) {
                         var data = resu;
@@ -104,9 +139,9 @@
                         if(data.code=="10000"){
                             obj.del();
                             layer.close(index);
-                            layer.msg("删除成功", {icon: 6});
+                            layer.msg(i18n.prop("del_success"), {icon: 6});
                         }else{
-                            layer.msg("删除失败", {icon: 5});
+                            layer.msg(i18n.prop("del_fail"), {icon: 5});
                         }
 
                     });
@@ -120,6 +155,21 @@
 
         // 查询
         $('.demoTable .layui-btn').on('click',function(){refresh()});
+
+        function updateStatus(id,status) {
+            $.post(alldata.path+"platform/updateStatus",{"id":id,"status":status},function (resu) {
+                var data = resu;
+                //判断code
+                if(data.code=="10000"){
+                    layer.msg(i18n.prop("update_success"), {icon: 6});
+                }else{
+                    layer.msg(i18n.prop("update_fail"), {icon: 5});
+                }
+                // 刷新数据
+                refresh();
+
+            });
+        }
 
         // 刷新表格数据
         function refresh() {
@@ -136,7 +186,7 @@
 
         function editPlatform() {
             layer.open({
-                title :'编辑平台',
+                title :i18n.prop("edit_platform"),
                 type: 2,
                 content: "./editPlatform.html", //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
                 area : [ '800px', '500px' ],
@@ -151,22 +201,21 @@
                 ids+=checkStatus.data[i].id+",";
             }
             if (ids.length<1) {
-                layer.msg("请选择要删除的行");
+                layer.msg(i18n.prop("select_row"));
                 return;
             }
-            layer.confirm('真的删除行么', function(index) {
+            layer.confirm(i18n.prop("del_confirm"), function(index) {
                 ids = ids.substr(0, ids.length - 1);
-                console.log('选中：' + ids);
                 $.post(alldata.path + "platform/deleteByIds", {"ids": ids}, function (resu) {
                     var data = resu;
                     //判断code
                     if (data.code == "10000") {
                         layer.close(index);
-                        layer.msg("删除成功", {icon: 6});
+                        layer.msg(i18n.prop("del_success"), {icon: 6});
                         // 刷新表格数据
                         refresh();
                     } else {
-                        layer.msg("删除失败", {icon: 5});
+                        layer.msg(i18n.prop("del_fail"), {icon: 5});
                     }
 
                 });
@@ -176,7 +225,7 @@
 
     function addPlatform() {
         layer.open({
-            title :'添加平台',
+            title :i18n.prop("add_platform"),
             type: 2,
             content: "./addPlatform.html", //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
             area : [ '800px', '500px' ],

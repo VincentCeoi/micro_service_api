@@ -29,4 +29,16 @@ public class BasicResult {
      */
     private List<?> list;
 
+    public BasicResult success(String msg) {
+        this.code=10000;
+        this.msg = msg;
+        return this;
+    }
+
+    public BasicResult fail(String msg) {
+        this.code=10001;
+        this.msg = msg;
+        return this;
+    }
+
 }

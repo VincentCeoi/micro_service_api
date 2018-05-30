@@ -11,5 +11,7 @@ import java.util.List;
  */
 public interface PlatformService extends Service<Platform> {
     List<Platform> queryPlatformList(String name);
+    void updateInvalidById(Integer id);
+    void updateInvalidByIds(List<Integer> ids);
 
 }

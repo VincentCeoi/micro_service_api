@@ -4,6 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
     <title name="title">MicroService 平台</title>
+    <meta id="i18n_pagename" content="index">
     <link rel="stylesheet" href="../layui-resources/css/layui.css">
     <!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
     <!--[if lt IE 9]>
@@ -39,16 +40,13 @@
                     <img src="http://t.cn/RCzsdCq" class="layui-nav-img">
                     admin
                 </a>
-                <dl class="layui-nav-child">
-                    <dd><a href="javascript:void(0)"
-                           onclick="internationaliztion.replace(2)">中文</a></dd>
-                    <dd><a href="javascript:void(0)"
-                           onclick="internationaliztion.replace(1)">English</a></dd>
-                </dl>
+                <!--<dl class="layui-nav-child">
+                    <dd><a href="">基本资料</a></dd>
+                    <dd><a href="">安全设置</a></dd>
+                </dl>-->
             </li>
-            <li class="layui-nav-item">
-                <a href="javascript:void(0);"
-                   internation="logout"  onclick="location.href='../login.html'">退了</a></li>
+            <li class="layui-nav-item"><a href="javascript:void(0);"
+                    onclick="location.href='../login.html'" class="i18n" name="Log_Out"></a></li>
         </ul>
     </div>
 
@@ -57,33 +55,36 @@
             <!-- 左侧导航区域（可配合layui已有的垂直导航） -->
             <ul class="layui-nav layui-nav-tree"  lay-filter="test">
                 <li class="layui-nav-item "> <!--layui-nav-itemed  默认选中 打开-->
-                    <a class="" href="javascript:;" >Data X管理</a>
+                    <a class="" href="javascript:;"><label class="i18n" name="DataX_Management"/></a>
                     <dl class="layui-nav-child">
                         <dd><a href="javascript:void(0);"
-                               onclick="switchPage('../layui-html/configList.html')">配置列表</a></dd>
+                               onclick="switchPage('../layui-html/configList.html')" class="i18n" name="Config_List"></a></dd>
                         <dd><a href="javascript:void(0);"
-                               onclick="switchPage('../layui-html/addConfig.html')">添加配置</a></dd>
+                               onclick="switchPage('../layui-html/addConfig.html')" class="i18n" name="Add_Config"></a></dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a class="" href="javascript:;">用户管理</a>
+                    <a class="" href="javascript:;"><label class="i18n" name="User_Management"/></a>
                     <dl class="layui-nav-child">
                         <dd><a href="javascript:void(0);"
-                               onclick="switchPage('../layui-html/userList.html')">用户列表</a>
+                               onclick="switchPage('../layui-html/userList.html')" class="i18n" name="User_List"></a>
+                        </dd>
+                        <dd><a href="javascript:void(0);"
+                              onclick="switchPage('../layui-html/addUser.html')" class="i18n" name="Add_User"></a>
                         </dd>
                     </dl>
                 </li>
                 <li class="layui-nav-item">
-                    <a class="" href="javascript:;">平台管理</a>
+                    <a class="" href="javascript:;"><label class="i18n" name="Platform_Management"/></a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;" onclick="switchPage('./platform/platformList.html')">平台列表</a></dd>
+                        <dd><a href="javascript:;" onclick="switchPage('./platform/platformList.html')" class="i18n" name="Platform_List"></a></dd>
                     </dl>
                 </li>
 
                 <li class="layui-nav-item">
-                    <a class="" href="javascript:;">日志管理</a>
+                    <a class="" href="javascript:;"><label class="i18n" name="Log_Management"/></a>
                     <dl class="layui-nav-child">
-                        <dd><a href="javascript:;" onclick="switchPage('./log/logList.html')">日志列表</a></dd>
+                        <dd><a href="javascript:;" onclick="switchPage('./log/logList.html')" class="i18n" name="Log_List"></a></dd>
                     </dl>
                 </li>
             </ul>
@@ -109,25 +110,34 @@
     </div>
 
 
+    <div class="layui-footer">
+        <div class="lan">
+            <span class="lan1"><label class="i18n" name="lan"></label></span>
+            <span class="lan2">
+                <select id="language">
+                    <option value="zh-CN">中文简体</option>
+                    <option value="zh-TW">中文繁體</option>
+                    <option value="en">English</option>
+                </select>
+            </span>
+        </div>
+        <!-- 底部固定区域 -->
+        <!--© layui.com - 底部固定区域-->
+    </div>
 </div>
 <script src="../layui-resources/layui.js"></script>
-<script src="../js/jquery-1.8.3.min.js"></script>
-<script src="../js/internationalization.js"></script>
+<!--<script src="../js/jquery-1.8.3.min.js"></script>-->
+<script src="../js/jquery.js "></script>
+<!-- 加载语言包文件 -->
+<script src="../js/jquery.i18n.properties.js"></script>
+<script src="../js/language.js"></script>
+
 <script>
     //JavaScript代码区域
     layui.use('element', function(){
         var element = layui.element;
+
     });
-
-    internationaliztion.replace(2);
-
- /*   function getUserInfo(){
-        $.post("","",function (resu) {
-
-        });
-
-    }*/
-
 
     /**
      * 切换页面

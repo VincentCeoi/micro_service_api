@@ -9,4 +9,7 @@ import java.util.List;
 public interface PlatformMapper extends Mapper<Platform> {
     List<Platform> queryPlatformList(@Param("name") String name);
 
+    void updateInvalidById(Integer id);
+
+    void updateInvalidByIds(@Param("ids") List<Integer> ids);
 }

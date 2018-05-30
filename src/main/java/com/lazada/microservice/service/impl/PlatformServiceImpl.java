@@ -24,4 +24,15 @@ public class PlatformServiceImpl extends AbstractService<Platform> implements Pl
     public List<Platform> queryPlatformList(String name) {
         return platformMapper.queryPlatformList(name);
     }
+
+    @Override
+    public void updateInvalidById(Integer id) {
+        platformMapper.updateInvalidById(id);
+    }
+
+    @Override
+    public void updateInvalidByIds(List<Integer> ids) {
+        platformMapper.updateInvalidByIds(ids);
+
+    }
 }

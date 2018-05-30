@@ -33,4 +33,6 @@ public class Platform {
     private String apiKey;
 
     private Integer status;
+
+    private Integer invalid;
 }

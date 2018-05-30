@@ -7,6 +7,7 @@ import com.lazada.microservice.constans.LayUIResult;
 import com.lazada.microservice.model.Platform;
 import com.lazada.microservice.request.PlatformReq;
 import com.lazada.microservice.service.PlatformService;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,11 +15,14 @@ import javax.annotation.Resource;
 import java.util.Date;
 import java.util.List;
 
+import static java.util.stream.Collectors.toList;
+
 /**
  * 第三方平台管理
 * Created by CodeGenerator on 2018/05/21.
 */
 @RestController
+@CrossOrigin
 @RequestMapping("/platform")
 public class PlatformController {
 
@@ -43,18 +47,26 @@ public class PlatformController {
 
     @RequestMapping("/delete/{id}")
     public BasicResult delete(@PathVariable Integer id) {
-        platformService.deleteById(id);
-        basicResult.setMsg("数据删除成功！");
-        basicResult.setCode(10000);
-        return basicResult;
+        Platform platform = platformService.findById(id);
+        if (platform == null) {
+            return basicResult.fail("数据不存在");
+        }
+        platformService.updateInvalidById(id);
+        return basicResult.success("数据删除成功!");
     }
 
     @RequestMapping("/deleteByIds")
     public BasicResult deleteByIds(String ids) {
-        platformService.deleteByIds(ids);
-        basicResult.setMsg("数据删除成功！");
-        basicResult.setCode(10000);
-        return basicResult;
+        List<Platform> platformList = platformService.findByIds(ids);
+        if (CollectionUtils.isEmpty(platformList)) {
+            return basicResult.fail("数据不存在");
+        }
+        List<Integer> idList = platformList.stream()
+                .map(Platform::getId)
+                .collect(toList());
+        platformService.updateInvalidByIds(idList);
+
+        return basicResult.success("数据删除成功!");
     }
 
     @PostMapping("/update")
@@ -78,6 +90,23 @@ public class PlatformController {
         basicResult.setMsg("数据更新成功！");
         basicResult.setCode(10000);
         return basicResult;
+    }
+
+    /**
+     * 更改平台状态为:启用/禁用
+     * @param id
+     * @param status
+     * @return
+     */
+    @PostMapping("/updateStatus")
+    public BasicResult updateStatus(@RequestParam Integer id, @RequestParam Integer status) {
+        Platform platform = platformService.findById(id);
+        if (platform == null) {
+            return basicResult.fail("数据不存在!");
+        }
+        platform.setStatus(status);
+        platformService.update(platform);
+        return basicResult.success("数据更新成功!");
     }
 
     @RequestMapping("/platformList")

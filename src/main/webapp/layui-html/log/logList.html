@@ -72,12 +72,14 @@
                 };
             }
             ,max: new Date().getTime()
+            ,lang: 'en'
         });
         var endDate = laydate.render({
             elem: '#endDate'
             ,type:'datetime'
             ,format: 'yyyy-MM-dd HH:mm:ss'
             ,max: new Date().getTime()
+            ,lang: 'en'
             ,done:function(value, date) {
                 startDate.config.max={
                     year:date.year,
@@ -99,9 +101,9 @@
             ,cols: [[
                 {checkbox: true, fixed: true}
                 ,{field:'id', title: 'ID', sort: true}
+                ,{field:'createdAt',  title: '创建时间'}
                 ,{field:'platform', title: '平台名'}
                 ,{field:'url', title: '请求url'}
-                ,{field:'createdAt',  title: '创建时间'}
                 ,{field:'rstCode',  title: '状态'}
                 ,{field:'rstMsg',  title: '描述'}
             ]]
