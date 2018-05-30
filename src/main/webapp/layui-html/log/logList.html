@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>日志列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../layui-resources/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <style type="text/css">
+        .layui-table-cell{
+            height:40px;
+            line-height: 40px;
+        }
+    </style>
+</head>
+<body>
+<br/>
+
+
+<div class="demoTable">
+
+    <div style="margin-top: 20px;"></div>
+    平台名：
+    <div class="layui-inline" style="padding-right: 25px;">
+        <input class="layui-input" name="nameParam" id="nameParam" autocomplete="off">
+    </div>
+    时间:
+    <div class="layui-inline">
+        <input type="text" class="layui-input" id="startDate" name="startDate">
+    </div>
+    -
+    <div class="layui-inline">
+        <input type="text" class="layui-input" id="endDate" name="endDate">
+    </div>
+
+    <button class="layui-btn" data-type="reload" id="search">搜索</button>
+
+</div>
+
+<table class="layui-hide" id="table_log" lay-filter="logList"></table>
+
+</body>
+
+
+
+<script src="../../js/parent.js" charset="utf-8"></script>
+<script src="../../js/jquery-1.8.3.min.js" charset="utf-8"></script>
+<script src="../../layui-resources/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+<script>
+    var table,currentPage;
+    layui.use(['table', 'laydate', 'jquery'], function(){
+        table = layui.table;
+        var laydate = layui.laydate,
+        $ = layui.$;
+        //时间选择器
+        var startDate = laydate.render({
+            elem: '#startDate'
+            ,type:'datetime'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,done:function(value, date){
+                endDate.config.min ={
+                    year:date.year,
+                    month:date.month-1, //关键
+                    date: date.date,
+                    hours: date.hours,
+                    minutes: date.minutes,
+                    seconds : date.seconds
+                };
+            }
+            ,max: new Date().getTime()
+        });
+        var endDate = laydate.render({
+            elem: '#endDate'
+            ,type:'datetime'
+            ,format: 'yyyy-MM-dd HH:mm:ss'
+            ,max: new Date().getTime()
+            ,done:function(value, date) {
+                startDate.config.max={
+                    year:date.year,
+                    month:date.month-1,//关键
+                    date: date.date,
+                    hours: date.hours,
+                    minutes: date.minutes,
+                    seconds : date.seconds
+                }
+            }
+        });
+
+        table.render({
+            id: 'logReload'
+            ,elem: '#table_log'
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,url:alldata.path+'log/logList'
+            ,page: true
+            ,cols: [[
+                {checkbox: true, fixed: true}
+                ,{field:'id', title: 'ID', sort: true}
+                ,{field:'platform', title: '平台名'}
+                ,{field:'url', title: '请求url'}
+                ,{field:'createdAt',  title: '创建时间'}
+                ,{field:'rstCode',  title: '状态'}
+                ,{field:'rstMsg',  title: '描述'}
+            ]]
+            ,done: function(res, page, count){
+                //如果是异步请求数据方式，res即为你接口返回的信息。
+                //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+
+                // 当前页码
+                currentPage = page;
+            }
+        });
+
+        var $ = layui.$;
+
+        // 查询
+        $('#search').on('click',function(){refresh()});
+
+        // 刷新表格数据
+        function refresh() {
+            //执行重载
+            table.reload('logReload', {
+                page: {
+                    curr: currentPage //重新从当前页开始
+                }
+                , where: {
+                    nameParam: $('#nameParam').val()
+                    ,startDate:$("#startDate").val()
+                    ,endDate:$("#endDate").val()
+                }
+            });
+        }
+
+    });
+</script>
+
+</body>
+</html>

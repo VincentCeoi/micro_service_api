@@ -3,7 +3,6 @@ package com.lazada.microservice.service.impl;
 import com.lazada.microservice.mapper.DataXMapper;
 import com.lazada.microservice.model.DataX;
 import com.lazada.microservice.service.DataXService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;

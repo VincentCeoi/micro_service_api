@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>平台列表</title>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="stylesheet" href="../../layui-resources/css/layui.css" media="all">
+    <!-- 注意：如果你直接复制所有代码到本地，上述css路径需要改成你本地的 -->
+    <style type="text/css">
+        .layui-table-cell{
+            height:40px;
+            line-height: 40px;
+        }
+    </style>
+</head>
+<body>
+<br/>
+
+
+<div class="demoTable">
+
+    <div style="margin-top: 20px;"></div>
+    <div class="layui-btn-group">
+        <button class="layui-btn" onclick="addPlatform()">增加</button>
+        <button class="layui-btn" id="deletePlatform">删除</button>
+    </div>
+
+    <div style="float: right">
+        名称：
+        <div class="layui-inline">
+            <input class="layui-input" name="nameParam" id="nameParam" autocomplete="off">
+        </div>
+        <button class="layui-btn" data-type="reload">搜索</button>
+    </div>
+
+</div>
+<table class="layui-hide" id="table_platform" lay-filter="platform"></table>
+<script type="text/html" id="barDemo">
+    <a class="layui-btn layui-btn-mini" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-mini" lay-event="del">删除</a>
+</script>
+</body>
+
+
+
+<script src="../../js/parent.js" charset="utf-8"></script>
+<script src="../../js/jquery-1.8.3.min.js" charset="utf-8"></script>
+<script src="../../layui-resources/layui.js" charset="utf-8"></script>
+<!-- 注意：如果你直接复制所有代码到本地，上述js路径需要改成你本地的 -->
+
+<script>
+    var rowData,table,currentPage;
+    layui.use('table', function(){
+        table = layui.table;
+
+        table.render({
+            id: 'testReload'
+            ,elem: '#table_platform'
+            ,cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            ,url:alldata.path+'platform/platformList'
+            ,page: true
+            ,cols: [[
+                {checkbox: true, fixed: true}
+                ,{field:'id', title: 'ID', sort: true}
+                ,{field:'name', title: '名称'}
+                ,{field:'tradingName', title: '商品号'}
+                ,{field:'linehaulCode', title: 'linehaul编号'}
+                ,{field:'apiKey', title: 'key'}
+                ,{field:'createdAt',  title: '创建时间'}
+                ,{field:'updatedAt',  title: '更新时间'}
+                ,{field:'status',  title: '状态',sort: true}
+                ,{field:'right', title: '操作',toolbar:"#barDemo"}
+            ]]
+            ,done: function(res, page, count){
+                //如果是异步请求数据方式，res即为你接口返回的信息。
+                //如果是直接赋值的方式，res即为：{data: [], count: 99} data为当前页数据、count为数据总长度
+
+                //分类显示中文名称
+                $("[data-field='status']").children().each(function(){
+                    if($(this).text()=='1'){
+                        $(this).text("可用")
+                    }else if($(this).text()=='2'){
+                        $(this).text("不可用")
+                    }
+                })
+
+                // 当前页码
+                currentPage = page;
+            }
+        });
+
+        //监听工具条
+        table.on('tool(platform)', function(obj){
+            var data = obj.data;
+            rowData = data;
+            if(obj.event === 'del'){
+                layer.confirm('真的删除行么', function(index){
+
+                    $.post(alldata.path+"platform/delete/"+data.id,{},function (resu) {
+                        var data = resu;
+                        //判断code
+                        if(data.code=="10000"){
+                            obj.del();
+                            layer.close(index);
+                            layer.msg("删除成功", {icon: 6});
+                        }else{
+                            layer.msg("删除失败", {icon: 5});
+                        }
+
+                    });
+                });
+            } else if(obj.event === 'edit'){
+                editPlatform();
+            }
+        });
+
+        var $ = layui.$;
+
+        // 查询
+        $('.demoTable .layui-btn').on('click',function(){refresh()});
+
+        // 刷新表格数据
+        function refresh() {
+            //执行重载
+            table.reload('testReload', {
+                page: {
+                    curr: currentPage //重新从当前页开始
+                }
+                , where: {
+                    nameParam: $('#nameParam').val()
+                }
+            });
+        }
+
+        function editPlatform() {
+            layer.open({
+                title :'编辑平台',
+                type: 2,
+                content: "./editPlatform.html", //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+                area : [ '800px', '500px' ],
+            });
+        }
+
+        // 批量删除
+        $("#deletePlatform").on('click',function(){
+            var checkStatus = table.checkStatus('testReload'),
+                ids="";
+            for(var i=0;i<checkStatus.data.length;i++){
+                ids+=checkStatus.data[i].id+",";
+            }
+            if (ids.length<1) {
+                layer.msg("请选择要删除的行");
+                return;
+            }
+            layer.confirm('真的删除行么', function(index) {
+                ids = ids.substr(0, ids.length - 1);
+                console.log('选中：' + ids);
+                $.post(alldata.path + "platform/deleteByIds", {"ids": ids}, function (resu) {
+                    var data = resu;
+                    //判断code
+                    if (data.code == "10000") {
+                        layer.close(index);
+                        layer.msg("删除成功", {icon: 6});
+                        // 刷新表格数据
+                        refresh();
+                    } else {
+                        layer.msg("删除失败", {icon: 5});
+                    }
+
+                });
+            });
+        })
+    });
+
+    function addPlatform() {
+        layer.open({
+            title :'添加平台',
+            type: 2,
+            content: "./addPlatform.html", //这里content是一个DOM，注意：最好该元素要存放在body最外层，否则可能被其它的相对元素所影响
+            area : [ '800px', '500px' ],
+        });
+    }
+
+</script>
+
+</body>
+</html>
